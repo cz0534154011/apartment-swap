@@ -1,0 +1,129 @@
+// מבנה מסד הנתונים של אתר החלפת הדירות
+// כל שינוי בקובץ הזה דורש Migration חדש: npm run db:migrate
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ApartmentStatus {
+  ACTIVE
+  HIDDEN
+}
+
+enum SwapStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  AUTO_REJECTED
+  WITHDRAWN
+  CANCELLED
+  EXPIRED
+}
+
+// משתמשים רשומים ומנהלים
+model User {
+  id              Int       @id @default(autoincrement())
+  fullName        String    @db.VarChar(60)
+  email           String    @unique @db.VarChar(254)
+  phone           String?   @db.VarChar(16)
+  passwordHash    String
+  role            Role      @default(USER)
+  termsAcceptedAt DateTime
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  apartment      Apartment?
+  cancelRequests SwapOffer[] @relation("CancelRequestedBy")
+}
+
+// רשימת הערים, מנוהלת על ידי המנהל
+model City {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(40)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  apartments Apartment[]
+}
+
+// האובייקט המרכזי: מודעת הדירה. לכל משתמש לכל היותר דירה אחת
+model Apartment {
+  id              Int             @id @default(autoincrement())
+  ownerId         Int             @unique
+  owner           User            @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  cityId          Int
+  city            City            @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  title           String          @db.VarChar(100)
+  neighborhood    String          @db.VarChar(60)
+  rooms           Decimal         @db.Decimal(3, 1)
+  beds            Int
+  floor           Int
+  hasElevator     Boolean         @default(false)
+  hasPlata        Boolean         @default(false)
+  hasUrn          Boolean         @default(false)
+  hasShabbatClock Boolean         @default(false)
+  hasEruv         Boolean         @default(false)
+  hasGenerator    Boolean         @default(false)
+  description     String          @db.VarChar(2000)
+  status          ApartmentStatus @default(ACTIVE)
+  isBlocked       Boolean         @default(false)
+  blockReason     String?         @db.VarChar(300)
+  blockedAt       DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  blockedDates   BlockedDate[]
+  sentOffers     SwapOffer[]   @relation("SenderApartment")
+  receivedOffers SwapOffer[]   @relation("ReceiverApartment")
+
+  @@index([cityId])
+  @@index([status, isBlocked])
+  @@index([beds])
+}
+
+// תאריכים שבעל הדירה חסם ידנית
+model BlockedDate {
+  id          Int       @id @default(autoincrement())
+  apartmentId Int
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  startDate   DateTime  @db.Date
+  endDate     DateTime  @db.Date
+  note        String?   @db.VarChar(100)
+  createdAt   DateTime  @default(now())
+
+  @@index([apartmentId, startDate, endDate])
+}
+
+// הצעות החלפה לכל אורך חייהן
+model SwapOffer {
+  id                  Int        @id @default(autoincrement())
+  senderApartmentId   Int
+  senderApartment     Apartment  @relation("SenderApartment", fields: [senderApartmentId], references: [id], onDelete: Restrict)
+  receiverApartmentId Int
+  receiverApartment   Apartment  @relation("ReceiverApartment", fields: [receiverApartmentId], references: [id], onDelete: Restrict)
+  startDate           DateTime   @db.Date
+  endDate             DateTime   @db.Date
+  message             String?    @db.VarChar(500)
+  status              SwapStatus @default(PENDING)
+  respondedAt         DateTime?
+  cancelRequestedById Int?
+  cancelRequestedBy   User?      @relation("CancelRequestedBy", fields: [cancelRequestedById], references: [id], onDelete: SetNull)
+  cancelRequestReason String?    @db.VarChar(300)
+  cancelRequestedAt   DateTime?
+  cancelledAt         DateTime?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@index([receiverApartmentId, status, startDate, endDate])
+  @@index([senderApartmentId, status, startDate, endDate])
+}

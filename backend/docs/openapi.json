@@ -1,0 +1,4767 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Apartment Swap API - אתר החלפת דירות",
+    "version": "1.0.0",
+    "description": "צד השרת של אתר החלפת דירות לשבתות ולחופשות.\n\n**איך בודקים קריאות מוגנות:**\n1. פתחו את POST /api/auth/login, לחצו Try it out, ושלחו מייל וסיסמה.\n2. העתיקו את הערך של token מהתשובה (בלי מרכאות).\n3. לחצו על הכפתור **Authorize** למעלה, הדביקו את ה-token ולחצו Authorize.\n4. מעכשיו כל קריאה תישלח עם הכותרת Authorization: Bearer <token>.\n\nבלי Token מתקבל 401. עם Token של משתמש רגיל בפעולת מנהל מתקבל 403.\n\n**תאריכים:** תמיד YYYY-MM-DD, לפי שעון ישראל. **שגיאות:** תמיד במבנה { error: { code, message, details? } }."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "השרת הנוכחי"
+    }
+  ],
+  "tags": [
+    {
+      "name": "כללי"
+    },
+    {
+      "name": "התחברות"
+    },
+    {
+      "name": "ערים"
+    },
+    {
+      "name": "דירות"
+    },
+    {
+      "name": "הדירה שלי"
+    },
+    {
+      "name": "החלפות"
+    },
+    {
+      "name": "ניהול"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": [
+          "כללי"
+        ],
+        "summary": "בדיקת בריאות השרת",
+        "description": "מחזיר ok אם השרת והמסד זמינים. 503 אם המסד לא זמין. **הרשאה:** ציבורי.",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "השרת תקין",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "database": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2026-10-21T18:30:00.000Z"
+                    }
+                  }
+                },
+                "example": {
+                  "status": "ok",
+                  "database": "ok",
+                  "time": "2026-10-21T18:30:00.000Z"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "המסד לא זמין"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/site-info": {
+      "get": {
+        "tags": [
+          "כללי"
+        ],
+        "summary": "פרטי קשר של מנהל האתר ונוסח התקנון",
+        "description": "להצגה בעמוד התקנון, בתחתית האתר ובתזכורות. **הרשאה:** ציבורי.",
+        "operationId": "siteInfo",
+        "responses": {
+          "200": {
+            "description": "פרטי האתר",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "adminContactEmail": {
+                      "type": "string"
+                    },
+                    "termsVersion": {
+                      "type": "string"
+                    },
+                    "termsText": {
+                      "type": "string",
+                      "description": "שורות מופרדות ב-\\n"
+                    }
+                  }
+                },
+                "example": {
+                  "adminContactEmail": "admin@example.com",
+                  "termsVersion": "1",
+                  "termsText": "תקנון השימוש באתר החלפת הדירות\n..."
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "התחברות"
+        ],
+        "summary": "הרשמה",
+        "description": "יוצר משתמש רגיל (USER) ומחזיר Token, כך שהמשתמש מחובר מיד. חובה acceptTerms=true. המייל נשמר באותיות קטנות. הטלפון נשמר בלי מקפים ורווחים. **הרשאה:** ציבורי.",
+        "operationId": "register",
+        "responses": {
+          "201": {
+            "description": "נרשם בהצלחה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "expiresIn": 86400,
+                  "user": {
+                    "id": 2,
+                    "fullName": "משפחת כהן",
+                    "email": "cohen@example.com",
+                    "phone": "0501234567",
+                    "role": "USER",
+                    "createdAt": "2026-10-21T18:30:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "409": {
+            "description": "המייל כבר רשום",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "EMAIL_TAKEN",
+                    "message": "כתובת המייל כבר רשומה באתר"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 60
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 72,
+                    "description": "לפחות אות אחת וספרה אחת"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "לא חובה. 9 עד 15 ספרות, מותר + מקפים ורווחים"
+                  },
+                  "acceptTerms": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  }
+                },
+                "required": [
+                  "fullName",
+                  "email",
+                  "password",
+                  "acceptTerms"
+                ]
+              },
+              "example": {
+                "fullName": "משפחת כהן",
+                "email": "cohen@example.com",
+                "password": "Secret123",
+                "phone": "050-1234567",
+                "acceptTerms": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "התחברות"
+        ],
+        "summary": "התחברות",
+        "description": "מחזיר Token. **ב-Swagger:** אחרי התחברות, העתיקו את token ולחצו Authorize. **הרשאה:** ציבורי. משתמשי הדגמה בסביבת פיתוח: admin@example.com / Admin1234, cohen@example.com / Demo1234.",
+        "operationId": "login",
+        "responses": {
+          "200": {
+            "description": "התחברות הצליחה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "expiresIn": 86400,
+                  "user": {
+                    "id": 2,
+                    "fullName": "משפחת כהן",
+                    "email": "cohen@example.com",
+                    "phone": "0501234567",
+                    "role": "USER",
+                    "createdAt": "2026-10-21T18:30:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "description": "מייל או סיסמה שגויים",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INVALID_CREDENTIALS",
+                    "message": "המייל או הסיסמה שגויים"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              },
+              "example": {
+                "email": "cohen@example.com",
+                "password": "Demo1234"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "התחברות"
+        ],
+        "summary": "המשתמש המחובר",
+        "description": "מחזיר את פרטי המשתמש לפי ה-Token, והאם כבר פרסם דירה. **הרשאה:** מחובר (משתמש או מנהל).",
+        "operationId": "getMe",
+        "responses": {
+          "200": {
+            "description": "המשתמש",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "hasApartment": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "user",
+                    "hasApartment"
+                  ]
+                },
+                "example": {
+                  "user": {
+                    "id": 2,
+                    "fullName": "משפחת כהן",
+                    "email": "cohen@example.com",
+                    "phone": "0501234567",
+                    "role": "USER",
+                    "createdAt": "2026-10-21T18:30:00.000Z"
+                  },
+                  "hasApartment": true
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "התחברות"
+        ],
+        "summary": "עדכון שם וטלפון",
+        "description": "לפחות שדה אחד. phone=null או מחרוזת ריקה מוחקים את הטלפון. אי אפשר לשנות מייל או תפקיד. **הרשאה:** מחובר.",
+        "operationId": "updateMe",
+        "responses": {
+          "200": {
+            "description": "עודכן",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  },
+                  "required": [
+                    "user"
+                  ]
+                },
+                "example": {
+                  "user": {
+                    "id": 2,
+                    "fullName": "משפחת כהן",
+                    "email": "cohen@example.com",
+                    "phone": "0501234567",
+                    "role": "USER",
+                    "createdAt": "2026-10-21T18:30:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 60
+                  },
+                  "phone": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              },
+              "example": {
+                "fullName": "משפחת כהן",
+                "phone": "052-1112222"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cities": {
+      "get": {
+        "tags": [
+          "ערים"
+        ],
+        "summary": "רשימת ערים",
+        "description": "ערים פעילות, ממוינות לפי שם. מנהל יכול לבקש גם מושבתות עם includeInactive=true. **הרשאה:** ציבורי.",
+        "operationId": "listCities",
+        "responses": {
+          "200": {
+            "description": "רשימת ערים",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/City"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "name": "ירושלים",
+                    "isActive": true
+                  },
+                  {
+                    "id": 2,
+                    "name": "בני ברק",
+                    "isActive": true
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "includeInactive",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "למנהל בלבד: לכלול ערים מושבתות"
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "ערים"
+        ],
+        "summary": "הוספת עיר",
+        "description": "**הרשאה:** מנהל בלבד. אורח מקבל 401, משתמש רגיל 403.",
+        "operationId": "createCity",
+        "responses": {
+          "201": {
+            "description": "נוספה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "city": {
+                      "$ref": "#/components/schemas/City"
+                    }
+                  },
+                  "required": [
+                    "city"
+                  ]
+                },
+                "example": {
+                  "city": {
+                    "id": 1,
+                    "name": "ירושלים",
+                    "isActive": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "קיימת עיר בשם הזה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "CITY_EXISTS",
+                    "message": "עיר בשם הזה כבר קיימת"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 40
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              },
+              "example": {
+                "name": "אלעד"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cities/{id}": {
+      "patch": {
+        "tags": [
+          "ערים"
+        ],
+        "summary": "שינוי שם או הפעלה/השבתה של עיר",
+        "description": "**הרשאה:** מנהל בלבד. אורח מקבל 401, משתמש רגיל 403. עיר מושבתת לא מופיעה בבחירה לדירות חדשות, ודירות קיימות בה נשארות.",
+        "operationId": "updateCity",
+        "responses": {
+          "200": {
+            "description": "עודכנה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "city": {
+                      "$ref": "#/components/schemas/City"
+                    }
+                  },
+                  "required": [
+                    "city"
+                  ]
+                },
+                "example": {
+                  "city": {
+                    "id": 1,
+                    "name": "ירושלים",
+                    "isActive": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "קיימת עיר בשם הזה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "CITY_EXISTS",
+                    "message": "עיר בשם הזה כבר קיימת"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 40
+                  },
+                  "isActive": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "isActive": false
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ערים"
+        ],
+        "summary": "מחיקת עיר",
+        "description": "**הרשאה:** מנהל בלבד. אורח מקבל 401, משתמש רגיל 403. רק עיר שאין בה דירות. אחרת 409, ואפשר להשבית אותה במקום.",
+        "operationId": "deleteCity",
+        "responses": {
+          "204": {
+            "description": "נמחקה"
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "יש בעיר דירות",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "CITY_IN_USE",
+                    "message": "אי אפשר למחוק עיר שיש בה דירות. אפשר להשבית אותה במקום"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ]
+      }
+    },
+    "/api/apartments": {
+      "get": {
+        "tags": [
+          "דירות"
+        ],
+        "summary": "חיפוש דירות",
+        "description": "רק דירות פעילות ולא חסומות. משתמש מחובר לא רואה את הדירה של עצמו. כל הסינונים לא חובה. from+to (חייבים יחד, עד 14 ימים): רק דירות פנויות בכל הטווח. תאריכים בפורמט YYYY-MM-DD. לא לפני היום, לא מעבר ל-6 חודשים מהיום. ערך true בסינוני האביזרים פירושו 'חייב שיהיה'; false או השמטה פירושם בלי סינון. **הרשאה:** ציבורי.",
+        "operationId": "searchApartments",
+        "responses": {
+          "200": {
+            "description": "עמוד תוצאות",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApartmentPage"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": 1,
+                      "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                      "city": {
+                        "id": 1,
+                        "name": "ירושלים"
+                      },
+                      "neighborhood": "רמות",
+                      "rooms": 4,
+                      "beds": 7,
+                      "floor": 2,
+                      "hasElevator": true,
+                      "hasPlata": true,
+                      "hasUrn": true,
+                      "hasShabbatClock": true,
+                      "hasEruv": true,
+                      "hasGenerator": false,
+                      "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+                      "createdAt": "2026-10-21T18:30:00.000Z",
+                      "updatedAt": "2026-10-21T18:30:00.000Z"
+                    }
+                  ],
+                  "page": 1,
+                  "pageSize": 12,
+                  "total": 1,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        },
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "מזהה עיר"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "תחילת טווח"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "סוף טווח"
+          },
+          {
+            "name": "minBeds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "description": "מיטות מינימום"
+          },
+          {
+            "name": "minRooms",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "description": "חדרים מינימום"
+          },
+          {
+            "name": "hasElevator",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "מעלית"
+          },
+          {
+            "name": "hasPlata",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "פלטה"
+          },
+          {
+            "name": "hasUrn",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "מיחם"
+          },
+          {
+            "name": "hasShabbatClock",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "שעוני שבת"
+          },
+          {
+            "name": "hasEruv",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "עירוב באזור"
+          },
+          {
+            "name": "hasGenerator",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "גנרטור"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "description": "טקסט חופשי בכותרת, בשכונה ובתיאור"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "newest",
+                "beds"
+              ],
+              "default": "newest"
+            },
+            "description": "מיון"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ]
+      }
+    },
+    "/api/apartments/{id}": {
+      "get": {
+        "tags": [
+          "דירות"
+        ],
+        "summary": "פרטי דירה",
+        "description": "בלי פרטי קשר של בעל הדירה. דירה מוסתרת או חסומה מחזירה 404, חוץ מלבעל הדירה ולמנהל (שמקבלים גם status ומידע על חסימה). **הרשאה:** ציבורי.",
+        "operationId": "getApartment",
+        "responses": {
+          "200": {
+            "description": "הדירה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApartmentResponse"
+                },
+                "example": {
+                  "apartment": {
+                    "id": 1,
+                    "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                    "city": {
+                      "id": 1,
+                      "name": "ירושלים"
+                    },
+                    "neighborhood": "רמות",
+                    "rooms": 4,
+                    "beds": 7,
+                    "floor": 2,
+                    "hasElevator": true,
+                    "hasPlata": true,
+                    "hasUrn": true,
+                    "hasShabbatClock": true,
+                    "hasEruv": true,
+                    "hasGenerator": false,
+                    "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "updatedAt": "2026-10-21T18:30:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ]
+      }
+    },
+    "/api/apartments/{id}/calendar": {
+      "get": {
+        "tags": [
+          "דירות"
+        ],
+        "summary": "לוח תפוסה של דירה",
+        "description": "טווחים תפוסים: החלפות מאושרות (SWAP) וחסימות ידניות (BLOCKED) שחופפים לחלון. ברירת מחדל: מהיום ועד 6 חודשים. מוחזרים הטווחים כפי שנשמרו (טווח יכול להתחיל לפני from). לבעל הדירה בלבד מוחזרים גם pendingRanges. **הרשאה:** ציבורי.",
+        "operationId": "getCalendar",
+        "responses": {
+          "200": {
+            "description": "לוח התפוסה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarResponse"
+                },
+                "example": {
+                  "apartmentId": 1,
+                  "from": "2026-10-21",
+                  "to": "2027-04-21",
+                  "busyRanges": [
+                    {
+                      "startDate": "2026-11-04",
+                      "endDate": "2026-11-06",
+                      "reason": "SWAP"
+                    },
+                    {
+                      "startDate": "2026-11-13",
+                      "endDate": "2026-11-15",
+                      "reason": "BLOCKED"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "ברירת מחדל: היום"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "ברירת מחדל: היום + 6 חודשים"
+          }
+        ]
+      }
+    },
+    "/api/my/apartment": {
+      "get": {
+        "tags": [
+          "הדירה שלי"
+        ],
+        "summary": "הדירה שלי",
+        "description": "הדירה נמצאת לפי ה-Token. 404 NO_APARTMENT אם עדיין לא פורסמה. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403.",
+        "operationId": "getMyApartment",
+        "responses": {
+          "200": {
+            "description": "הדירה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyApartmentResponse"
+                },
+                "example": {
+                  "apartment": {
+                    "id": 1,
+                    "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                    "city": {
+                      "id": 1,
+                      "name": "ירושלים"
+                    },
+                    "neighborhood": "רמות",
+                    "rooms": 4,
+                    "beds": 7,
+                    "floor": 2,
+                    "hasElevator": true,
+                    "hasPlata": true,
+                    "hasUrn": true,
+                    "hasShabbatClock": true,
+                    "hasEruv": true,
+                    "hasGenerator": false,
+                    "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "updatedAt": "2026-10-21T18:30:00.000Z",
+                    "status": "ACTIVE",
+                    "isBlocked": false,
+                    "blockReason": null,
+                    "blockedAt": null
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "הדירה שלי"
+        ],
+        "summary": "פרסום דירה",
+        "description": "דירה אחת לכל משתמש. מספרים נשלחים כמספרים ב-JSON. העיר חייבת להיות פעילה. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403.",
+        "operationId": "createMyApartment",
+        "responses": {
+          "201": {
+            "description": "פורסמה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyApartmentResponse"
+                },
+                "example": {
+                  "apartment": {
+                    "id": 1,
+                    "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                    "city": {
+                      "id": 1,
+                      "name": "ירושלים"
+                    },
+                    "neighborhood": "רמות",
+                    "rooms": 4,
+                    "beds": 7,
+                    "floor": 2,
+                    "hasElevator": true,
+                    "hasPlata": true,
+                    "hasUrn": true,
+                    "hasShabbatClock": true,
+                    "hasEruv": true,
+                    "hasGenerator": false,
+                    "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "updatedAt": "2026-10-21T18:30:00.000Z",
+                    "status": "ACTIVE",
+                    "isBlocked": false,
+                    "blockReason": null,
+                    "blockedAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "כבר יש לך דירה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "APARTMENT_EXISTS",
+                    "message": "כבר פרסמת דירה. אפשר לערוך אותה במסך \"הדירה שלי\""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApartmentInput"
+              },
+              "example": {
+                "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                "cityId": 1,
+                "neighborhood": "רמות",
+                "rooms": 4.5,
+                "beds": 7,
+                "floor": 2,
+                "hasElevator": true,
+                "hasPlata": true,
+                "hasUrn": true,
+                "hasShabbatClock": true,
+                "hasEruv": true,
+                "hasGenerator": false,
+                "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת."
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "הדירה שלי"
+        ],
+        "summary": "עריכת הדירה שלי",
+        "description": "שולחים את כל השדות (כמו בפרסום). אפשרי גם כשהדירה חסומה. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403.",
+        "operationId": "updateMyApartment",
+        "responses": {
+          "200": {
+            "description": "עודכנה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyApartmentResponse"
+                },
+                "example": {
+                  "apartment": {
+                    "id": 1,
+                    "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                    "city": {
+                      "id": 1,
+                      "name": "ירושלים"
+                    },
+                    "neighborhood": "רמות",
+                    "rooms": 4,
+                    "beds": 7,
+                    "floor": 2,
+                    "hasElevator": true,
+                    "hasPlata": true,
+                    "hasUrn": true,
+                    "hasShabbatClock": true,
+                    "hasEruv": true,
+                    "hasGenerator": false,
+                    "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "updatedAt": "2026-10-21T18:30:00.000Z",
+                    "status": "ACTIVE",
+                    "isBlocked": false,
+                    "blockReason": null,
+                    "blockedAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApartmentInput"
+              },
+              "example": {
+                "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                "cityId": 1,
+                "neighborhood": "רמות",
+                "rooms": 4.5,
+                "beds": 7,
+                "floor": 2,
+                "hasElevator": true,
+                "hasPlata": true,
+                "hasUrn": true,
+                "hasShabbatClock": true,
+                "hasEruv": true,
+                "hasGenerator": false,
+                "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/my/apartment/status": {
+      "patch": {
+        "tags": [
+          "הדירה שלי"
+        ],
+        "summary": "פעילה או מוסתרת",
+        "description": "מוסתרת: לא מופיעה בחיפוש ולא מקבלת הצעות חדשות. דירה חסומה על ידי מנהל: 403 APARTMENT_BLOCKED. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403.",
+        "operationId": "setMyApartmentStatus",
+        "responses": {
+          "200": {
+            "description": "עודכן",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyApartmentResponse"
+                },
+                "example": {
+                  "apartment": {
+                    "id": 1,
+                    "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                    "city": {
+                      "id": 1,
+                      "name": "ירושלים"
+                    },
+                    "neighborhood": "רמות",
+                    "rooms": 4,
+                    "beds": 7,
+                    "floor": 2,
+                    "hasElevator": true,
+                    "hasPlata": true,
+                    "hasUrn": true,
+                    "hasShabbatClock": true,
+                    "hasEruv": true,
+                    "hasGenerator": false,
+                    "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "updatedAt": "2026-10-21T18:30:00.000Z",
+                    "status": "HIDDEN",
+                    "isBlocked": false,
+                    "blockReason": null,
+                    "blockedAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "ACTIVE",
+                      "HIDDEN"
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "example": {
+                "status": "HIDDEN"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/my/apartment/blocked-dates": {
+      "get": {
+        "tags": [
+          "הדירה שלי"
+        ],
+        "summary": "החסימות הידניות שלי",
+        "description": "חסימות נוכחיות ועתידיות, לפי תאריך. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403.",
+        "operationId": "listMyBlockedDates",
+        "responses": {
+          "200": {
+            "description": "רשימה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BlockedDate"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "startDate": "2026-11-13",
+                    "endDate": "2026-11-15",
+                    "note": "אורחים מהמשפחה"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "הדירה שלי"
+        ],
+        "summary": "חסימת תאריכים",
+        "description": "עד 14 ימים. תאריכים בפורמט YYYY-MM-DD. לא לפני היום, לא מעבר ל-6 חודשים מהיום. אסור לחפוף להחלפה מאושרת או לחסימה קיימת (409). הצעות ממתינות שחופפות נדחות אוטומטית. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403.",
+        "operationId": "addMyBlockedDate",
+        "responses": {
+          "201": {
+            "description": "נוספה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockedDateCreated"
+                },
+                "example": {
+                  "blockedDate": {
+                    "id": 1,
+                    "startDate": "2026-11-13",
+                    "endDate": "2026-11-15",
+                    "note": "אורחים מהמשפחה"
+                  },
+                  "autoRejectedOffers": 0
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "התאריכים תפוסים",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "DATES_UNAVAILABLE",
+                    "message": "התאריכים חופפים להחלפה מאושרת או לחסימה קיימת"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockedDateInput"
+              },
+              "example": {
+                "startDate": "2026-11-13",
+                "endDate": "2026-11-15",
+                "note": "אורחים מהמשפחה"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/my/apartment/blocked-dates/{id}": {
+      "delete": {
+        "tags": [
+          "הדירה שלי"
+        ],
+        "summary": "מחיקת חסימה",
+        "description": "רק חסימה של הדירה שלך, שעדיין לא הסתיימה. חסימה של מישהו אחר: 404. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403.",
+        "operationId": "removeMyBlockedDate",
+        "responses": {
+          "204": {
+            "description": "נמחקה"
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "החסימה הסתיימה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "BLOCK_IN_PAST",
+                    "message": "אי אפשר למחוק חסימה שכבר הסתיימה"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ]
+      }
+    },
+    "/api/swaps": {
+      "post": {
+        "tags": [
+          "החלפות"
+        ],
+        "summary": "שליחת הצעת החלפה",
+        "description": "הדירה שלך מוצעת אוטומטית (לפי ה-Token). דרוש: דירה משלך פעילה ולא חסומה (אחרת 403 NO_APARTMENT / APARTMENT_HIDDEN / APARTMENT_BLOCKED). עד 14 ימים. תאריכים בפורמט YYYY-MM-DD. לא לפני היום, לא מעבר ל-6 חודשים מהיום. שתי הדירות חייבות להיות פנויות (409 DATES_UNAVAILABLE). **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403.",
+        "operationId": "createSwap",
+        "responses": {
+          "201": {
+            "description": "נשלחה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapResponse"
+                },
+                "example": {
+                  "swap": {
+                    "id": 2,
+                    "status": "PENDING",
+                    "startDate": "2026-11-20",
+                    "endDate": "2026-11-22",
+                    "message": "נשמח לשבת בירושלים.",
+                    "direction": "SENT",
+                    "senderApartment": {
+                      "id": 3,
+                      "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+                      "city": {
+                        "id": 7,
+                        "name": "צפת"
+                      },
+                      "neighborhood": "העיר העתיקה",
+                      "rooms": 3.5,
+                      "beds": 5
+                    },
+                    "receiverApartment": {
+                      "id": 1,
+                      "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                      "city": {
+                        "id": 1,
+                        "name": "ירושלים"
+                      },
+                      "neighborhood": "רמות",
+                      "rooms": 4,
+                      "beds": 7
+                    },
+                    "cancelRequest": null,
+                    "otherParty": {
+                      "fullName": "משפחת פרידמן",
+                      "email": "friedman@example.com",
+                      "phone": "0533334444"
+                    },
+                    "allowedActions": {
+                      "canApprove": false,
+                      "canReject": false,
+                      "canWithdraw": true,
+                      "canRequestCancel": false,
+                      "canApproveCancel": false,
+                      "canRejectCancel": false,
+                      "canWithdrawCancelRequest": false
+                    },
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "respondedAt": null,
+                    "cancelledAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "התאריכים תפוסים או הצעה כפולה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "DATES_UNAVAILABLE": {
+                    "value": {
+                      "error": {
+                        "code": "DATES_UNAVAILABLE",
+                        "message": "הדירה המבוקשת כבר תפוסה בחלק מהתאריכים האלה"
+                      }
+                    }
+                  },
+                  "DUPLICATE_OFFER": {
+                    "value": {
+                      "error": {
+                        "code": "DUPLICATE_OFFER",
+                        "message": "כבר שלחת לדירה הזו הצעה ממתינה בתאריכים חופפים"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "receiverApartmentId": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2026-11-13"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2026-11-13"
+                  },
+                  "message": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "receiverApartmentId",
+                  "startDate",
+                  "endDate"
+                ]
+              },
+              "example": {
+                "receiverApartmentId": 1,
+                "startDate": "2026-11-20",
+                "endDate": "2026-11-22",
+                "message": "נשמח לשבת בירושלים."
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "החלפות"
+        ],
+        "summary": "ההצעות וההחלפות שלי",
+        "description": "box=received (שקיבלתי), sent (ששלחתי) או all. סינון לפי status. מהחדשה לישנה. משתמש בלי דירה מקבל רשימה ריקה. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403.",
+        "operationId": "listMySwaps",
+        "responses": {
+          "200": {
+            "description": "עמוד",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapPage"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": 2,
+                      "status": "PENDING",
+                      "startDate": "2026-11-20",
+                      "endDate": "2026-11-22",
+                      "direction": "RECEIVED",
+                      "otherApartment": {
+                        "id": 3,
+                        "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+                        "city": {
+                          "id": 7,
+                          "name": "צפת"
+                        },
+                        "neighborhood": "העיר העתיקה",
+                        "rooms": 3.5,
+                        "beds": 5
+                      },
+                      "hasOpenCancelRequest": false,
+                      "cancelRequestedByMe": false,
+                      "createdAt": "2026-10-21T18:30:00.000Z"
+                    }
+                  ],
+                  "page": 1,
+                  "pageSize": 12,
+                  "total": 1,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "box",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "received",
+                "sent",
+                "all"
+              ],
+              "default": "all"
+            },
+            "description": "איזה הצעות"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/SwapStatus"
+            },
+            "description": "סינון לפי סטטוס"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ]
+      }
+    },
+    "/api/swaps/{id}": {
+      "get": {
+        "tags": [
+          "החלפות"
+        ],
+        "summary": "פרטי החלפה",
+        "description": "צד בהחלפה מקבל גם פרטי קשר של הצד השני (רק בהצעה ממתינה או מאושרת) ו-allowedActions. מנהל מקבל את שמות הבעלים, בלי פרטי קשר. מי שאינו צד: 404. **הרשאה:** צד בהחלפה או מנהל.",
+        "operationId": "getSwap",
+        "responses": {
+          "200": {
+            "description": "ההחלפה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapResponse"
+                },
+                "example": {
+                  "swap": {
+                    "id": 2,
+                    "status": "PENDING",
+                    "startDate": "2026-11-20",
+                    "endDate": "2026-11-22",
+                    "message": "נשמח לשבת בירושלים.",
+                    "direction": "RECEIVED",
+                    "senderApartment": {
+                      "id": 3,
+                      "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+                      "city": {
+                        "id": 7,
+                        "name": "צפת"
+                      },
+                      "neighborhood": "העיר העתיקה",
+                      "rooms": 3.5,
+                      "beds": 5
+                    },
+                    "receiverApartment": {
+                      "id": 1,
+                      "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                      "city": {
+                        "id": 1,
+                        "name": "ירושלים"
+                      },
+                      "neighborhood": "רמות",
+                      "rooms": 4,
+                      "beds": 7
+                    },
+                    "cancelRequest": null,
+                    "otherParty": {
+                      "fullName": "משפחת פרידמן",
+                      "email": "friedman@example.com",
+                      "phone": "0533334444"
+                    },
+                    "allowedActions": {
+                      "canApprove": true,
+                      "canReject": true,
+                      "canWithdraw": false,
+                      "canRequestCancel": false,
+                      "canApproveCancel": false,
+                      "canRejectCancel": false,
+                      "canWithdrawCancelRequest": false
+                    },
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "respondedAt": null,
+                    "cancelledAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ]
+      }
+    },
+    "/api/swaps/{id}/approve": {
+      "post": {
+        "tags": [
+          "החלפות"
+        ],
+        "summary": "אישור הצעה",
+        "description": "רק מקבל ההצעה, כשהיא ממתינה ותאריך ההתחלה לא עבר. השרת בודק שוב ששתי הדירות פנויות. באישור: התאריכים נחסמים בשתי הדירות, וכל ההצעות הממתינות האחרות של שתי הדירות שחופפות נדחות אוטומטית. התשובה היא פרטי ההחלפה המעודכנים, כולל allowedActions. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403. מי שאינו צד בהחלפה מקבל 404.",
+        "operationId": "approveSwap",
+        "responses": {
+          "200": {
+            "description": "בוצע",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapResponse"
+                },
+                "example": {
+                  "swap": {
+                    "id": 2,
+                    "status": "PENDING",
+                    "startDate": "2026-11-20",
+                    "endDate": "2026-11-22",
+                    "message": "נשמח לשבת בירושלים.",
+                    "direction": "RECEIVED",
+                    "senderApartment": {
+                      "id": 3,
+                      "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+                      "city": {
+                        "id": 7,
+                        "name": "צפת"
+                      },
+                      "neighborhood": "העיר העתיקה",
+                      "rooms": 3.5,
+                      "beds": 5
+                    },
+                    "receiverApartment": {
+                      "id": 1,
+                      "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                      "city": {
+                        "id": 1,
+                        "name": "ירושלים"
+                      },
+                      "neighborhood": "רמות",
+                      "rooms": 4,
+                      "beds": 7
+                    },
+                    "cancelRequest": null,
+                    "otherParty": {
+                      "fullName": "משפחת פרידמן",
+                      "email": "friedman@example.com",
+                      "phone": "0533334444"
+                    },
+                    "allowedActions": {
+                      "canApprove": true,
+                      "canReject": true,
+                      "canWithdraw": false,
+                      "canRequestCancel": false,
+                      "canApproveCancel": false,
+                      "canRejectCancel": false,
+                      "canWithdrawCancelRequest": false
+                    },
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "respondedAt": null,
+                    "cancelledAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "מצב ההחלפה לא מאפשר את הפעולה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INVALID_STATE",
+                    "message": "אפשר לאשר רק הצעה ממתינה (מצב נוכחי: נדחתה אוטומטית)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ]
+      }
+    },
+    "/api/swaps/{id}/reject": {
+      "post": {
+        "tags": [
+          "החלפות"
+        ],
+        "summary": "דחיית הצעה",
+        "description": "רק מקבל ההצעה, כשהיא ממתינה. התשובה היא פרטי ההחלפה המעודכנים, כולל allowedActions. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403. מי שאינו צד בהחלפה מקבל 404.",
+        "operationId": "rejectSwap",
+        "responses": {
+          "200": {
+            "description": "בוצע",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapResponse"
+                },
+                "example": {
+                  "swap": {
+                    "id": 2,
+                    "status": "PENDING",
+                    "startDate": "2026-11-20",
+                    "endDate": "2026-11-22",
+                    "message": "נשמח לשבת בירושלים.",
+                    "direction": "RECEIVED",
+                    "senderApartment": {
+                      "id": 3,
+                      "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+                      "city": {
+                        "id": 7,
+                        "name": "צפת"
+                      },
+                      "neighborhood": "העיר העתיקה",
+                      "rooms": 3.5,
+                      "beds": 5
+                    },
+                    "receiverApartment": {
+                      "id": 1,
+                      "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                      "city": {
+                        "id": 1,
+                        "name": "ירושלים"
+                      },
+                      "neighborhood": "רמות",
+                      "rooms": 4,
+                      "beds": 7
+                    },
+                    "cancelRequest": null,
+                    "otherParty": {
+                      "fullName": "משפחת פרידמן",
+                      "email": "friedman@example.com",
+                      "phone": "0533334444"
+                    },
+                    "allowedActions": {
+                      "canApprove": true,
+                      "canReject": true,
+                      "canWithdraw": false,
+                      "canRequestCancel": false,
+                      "canApproveCancel": false,
+                      "canRejectCancel": false,
+                      "canWithdrawCancelRequest": false
+                    },
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "respondedAt": null,
+                    "cancelledAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "מצב ההחלפה לא מאפשר את הפעולה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INVALID_STATE",
+                    "message": "אפשר לדחות רק הצעה ממתינה (מצב נוכחי: מאושרת)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ]
+      }
+    },
+    "/api/swaps/{id}/withdraw": {
+      "post": {
+        "tags": [
+          "החלפות"
+        ],
+        "summary": "משיכת הצעה",
+        "description": "רק שולח ההצעה, כשהיא ממתינה. התשובה היא פרטי ההחלפה המעודכנים, כולל allowedActions. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403. מי שאינו צד בהחלפה מקבל 404.",
+        "operationId": "withdrawSwap",
+        "responses": {
+          "200": {
+            "description": "בוצע",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapResponse"
+                },
+                "example": {
+                  "swap": {
+                    "id": 2,
+                    "status": "PENDING",
+                    "startDate": "2026-11-20",
+                    "endDate": "2026-11-22",
+                    "message": "נשמח לשבת בירושלים.",
+                    "direction": "RECEIVED",
+                    "senderApartment": {
+                      "id": 3,
+                      "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+                      "city": {
+                        "id": 7,
+                        "name": "צפת"
+                      },
+                      "neighborhood": "העיר העתיקה",
+                      "rooms": 3.5,
+                      "beds": 5
+                    },
+                    "receiverApartment": {
+                      "id": 1,
+                      "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                      "city": {
+                        "id": 1,
+                        "name": "ירושלים"
+                      },
+                      "neighborhood": "רמות",
+                      "rooms": 4,
+                      "beds": 7
+                    },
+                    "cancelRequest": null,
+                    "otherParty": {
+                      "fullName": "משפחת פרידמן",
+                      "email": "friedman@example.com",
+                      "phone": "0533334444"
+                    },
+                    "allowedActions": {
+                      "canApprove": true,
+                      "canReject": true,
+                      "canWithdraw": false,
+                      "canRequestCancel": false,
+                      "canApproveCancel": false,
+                      "canRejectCancel": false,
+                      "canWithdrawCancelRequest": false
+                    },
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "respondedAt": null,
+                    "cancelledAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "מצב ההחלפה לא מאפשר את הפעולה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INVALID_STATE",
+                    "message": "אפשר למשוך רק הצעה ממתינה (מצב נוכחי: מאושרת)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ]
+      }
+    },
+    "/api/swaps/{id}/cancel-request": {
+      "post": {
+        "tags": [
+          "החלפות"
+        ],
+        "summary": "בקשת ביטול להחלפה מאושרת",
+        "description": "כל אחד מהצדדים, לפני תאריך ההתחלה, כשאין בקשה פתוחה. ההחלפה נשארת מאושרת עד שהצד השני מחליט. התשובה היא פרטי ההחלפה המעודכנים, כולל allowedActions. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403. מי שאינו צד בהחלפה מקבל 404.",
+        "operationId": "requestCancel",
+        "responses": {
+          "200": {
+            "description": "בוצע",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapResponse"
+                },
+                "example": {
+                  "swap": {
+                    "id": 2,
+                    "status": "PENDING",
+                    "startDate": "2026-11-20",
+                    "endDate": "2026-11-22",
+                    "message": "נשמח לשבת בירושלים.",
+                    "direction": "RECEIVED",
+                    "senderApartment": {
+                      "id": 3,
+                      "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+                      "city": {
+                        "id": 7,
+                        "name": "צפת"
+                      },
+                      "neighborhood": "העיר העתיקה",
+                      "rooms": 3.5,
+                      "beds": 5
+                    },
+                    "receiverApartment": {
+                      "id": 1,
+                      "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                      "city": {
+                        "id": 1,
+                        "name": "ירושלים"
+                      },
+                      "neighborhood": "רמות",
+                      "rooms": 4,
+                      "beds": 7
+                    },
+                    "cancelRequest": null,
+                    "otherParty": {
+                      "fullName": "משפחת פרידמן",
+                      "email": "friedman@example.com",
+                      "phone": "0533334444"
+                    },
+                    "allowedActions": {
+                      "canApprove": true,
+                      "canReject": true,
+                      "canWithdraw": false,
+                      "canRequestCancel": false,
+                      "canApproveCancel": false,
+                      "canRejectCancel": false,
+                      "canWithdrawCancelRequest": false
+                    },
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "respondedAt": null,
+                    "cancelledAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "מצב ההחלפה לא מאפשר את הפעולה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "CANCEL_REQUEST_EXISTS",
+                    "message": "כבר קיימת בקשת ביטול פתוחה להחלפה הזו"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "maxLength": 300
+                  }
+                }
+              },
+              "example": {
+                "reason": "חלה במשפחה"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/swaps/{id}/cancel-request/approve": {
+      "post": {
+        "tags": [
+          "החלפות"
+        ],
+        "summary": "הסכמה לביטול",
+        "description": "רק הצד שלא ביקש. ההחלפה הופכת ל-CANCELLED והתאריכים משתחררים בשתי הדירות. התשובה היא פרטי ההחלפה המעודכנים, כולל allowedActions. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403. מי שאינו צד בהחלפה מקבל 404.",
+        "operationId": "approveCancel",
+        "responses": {
+          "200": {
+            "description": "בוצע",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapResponse"
+                },
+                "example": {
+                  "swap": {
+                    "id": 2,
+                    "status": "PENDING",
+                    "startDate": "2026-11-20",
+                    "endDate": "2026-11-22",
+                    "message": "נשמח לשבת בירושלים.",
+                    "direction": "RECEIVED",
+                    "senderApartment": {
+                      "id": 3,
+                      "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+                      "city": {
+                        "id": 7,
+                        "name": "צפת"
+                      },
+                      "neighborhood": "העיר העתיקה",
+                      "rooms": 3.5,
+                      "beds": 5
+                    },
+                    "receiverApartment": {
+                      "id": 1,
+                      "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                      "city": {
+                        "id": 1,
+                        "name": "ירושלים"
+                      },
+                      "neighborhood": "רמות",
+                      "rooms": 4,
+                      "beds": 7
+                    },
+                    "cancelRequest": null,
+                    "otherParty": {
+                      "fullName": "משפחת פרידמן",
+                      "email": "friedman@example.com",
+                      "phone": "0533334444"
+                    },
+                    "allowedActions": {
+                      "canApprove": true,
+                      "canReject": true,
+                      "canWithdraw": false,
+                      "canRequestCancel": false,
+                      "canApproveCancel": false,
+                      "canRejectCancel": false,
+                      "canWithdrawCancelRequest": false
+                    },
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "respondedAt": null,
+                    "cancelledAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "מצב ההחלפה לא מאפשר את הפעולה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "NO_CANCEL_REQUEST",
+                    "message": "אין בקשת ביטול פתוחה להחלפה הזו"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ]
+      }
+    },
+    "/api/swaps/{id}/cancel-request/reject": {
+      "post": {
+        "tags": [
+          "החלפות"
+        ],
+        "summary": "סירוב לביטול",
+        "description": "רק הצד שלא ביקש. ההחלפה נשארת בתוקף. התשובה היא פרטי ההחלפה המעודכנים, כולל allowedActions. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403. מי שאינו צד בהחלפה מקבל 404.",
+        "operationId": "rejectCancel",
+        "responses": {
+          "200": {
+            "description": "בוצע",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapResponse"
+                },
+                "example": {
+                  "swap": {
+                    "id": 2,
+                    "status": "PENDING",
+                    "startDate": "2026-11-20",
+                    "endDate": "2026-11-22",
+                    "message": "נשמח לשבת בירושלים.",
+                    "direction": "RECEIVED",
+                    "senderApartment": {
+                      "id": 3,
+                      "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+                      "city": {
+                        "id": 7,
+                        "name": "צפת"
+                      },
+                      "neighborhood": "העיר העתיקה",
+                      "rooms": 3.5,
+                      "beds": 5
+                    },
+                    "receiverApartment": {
+                      "id": 1,
+                      "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                      "city": {
+                        "id": 1,
+                        "name": "ירושלים"
+                      },
+                      "neighborhood": "רמות",
+                      "rooms": 4,
+                      "beds": 7
+                    },
+                    "cancelRequest": null,
+                    "otherParty": {
+                      "fullName": "משפחת פרידמן",
+                      "email": "friedman@example.com",
+                      "phone": "0533334444"
+                    },
+                    "allowedActions": {
+                      "canApprove": true,
+                      "canReject": true,
+                      "canWithdraw": false,
+                      "canRequestCancel": false,
+                      "canApproveCancel": false,
+                      "canRejectCancel": false,
+                      "canWithdrawCancelRequest": false
+                    },
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "respondedAt": null,
+                    "cancelledAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "מצב ההחלפה לא מאפשר את הפעולה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "NO_CANCEL_REQUEST",
+                    "message": "אין בקשת ביטול פתוחה להחלפה הזו"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ]
+      }
+    },
+    "/api/swaps/{id}/cancel-request/withdraw": {
+      "post": {
+        "tags": [
+          "החלפות"
+        ],
+        "summary": "משיכת בקשת הביטול",
+        "description": "רק מי שביקש. התשובה היא פרטי ההחלפה המעודכנים, כולל allowedActions. **הרשאה:** משתמש רגיל מחובר (Token). מנהל מקבל 403. מי שאינו צד בהחלפה מקבל 404.",
+        "operationId": "withdrawCancelRequest",
+        "responses": {
+          "200": {
+            "description": "בוצע",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapResponse"
+                },
+                "example": {
+                  "swap": {
+                    "id": 2,
+                    "status": "PENDING",
+                    "startDate": "2026-11-20",
+                    "endDate": "2026-11-22",
+                    "message": "נשמח לשבת בירושלים.",
+                    "direction": "RECEIVED",
+                    "senderApartment": {
+                      "id": 3,
+                      "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+                      "city": {
+                        "id": 7,
+                        "name": "צפת"
+                      },
+                      "neighborhood": "העיר העתיקה",
+                      "rooms": 3.5,
+                      "beds": 5
+                    },
+                    "receiverApartment": {
+                      "id": 1,
+                      "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                      "city": {
+                        "id": 1,
+                        "name": "ירושלים"
+                      },
+                      "neighborhood": "רמות",
+                      "rooms": 4,
+                      "beds": 7
+                    },
+                    "cancelRequest": null,
+                    "otherParty": {
+                      "fullName": "משפחת פרידמן",
+                      "email": "friedman@example.com",
+                      "phone": "0533334444"
+                    },
+                    "allowedActions": {
+                      "canApprove": true,
+                      "canReject": true,
+                      "canWithdraw": false,
+                      "canRequestCancel": false,
+                      "canApproveCancel": false,
+                      "canRejectCancel": false,
+                      "canWithdrawCancelRequest": false
+                    },
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "respondedAt": null,
+                    "cancelledAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "מצב ההחלפה לא מאפשר את הפעולה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "NO_CANCEL_REQUEST",
+                    "message": "אין בקשת ביטול פתוחה להחלפה הזו"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ]
+      }
+    },
+    "/api/admin/apartments": {
+      "get": {
+        "tags": [
+          "ניהול"
+        ],
+        "summary": "כל הדירות",
+        "description": "כולל מוסתרות וחסומות, עם פרטי הבעלים. חיפוש חלקי לפי מייל ו/או טלפון של הבעלים (מקפים ורווחים בטלפון לא משנים). **הרשאה:** מנהל בלבד. אורח מקבל 401, משתמש רגיל 403.",
+        "operationId": "adminListApartments",
+        "responses": {
+          "200": {
+            "description": "עמוד",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminApartmentPage"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": 1,
+                      "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                      "city": {
+                        "id": 1,
+                        "name": "ירושלים"
+                      },
+                      "neighborhood": "רמות",
+                      "rooms": 4,
+                      "beds": 7,
+                      "floor": 2,
+                      "hasElevator": true,
+                      "hasPlata": true,
+                      "hasUrn": true,
+                      "hasShabbatClock": true,
+                      "hasEruv": true,
+                      "hasGenerator": false,
+                      "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+                      "createdAt": "2026-10-21T18:30:00.000Z",
+                      "updatedAt": "2026-10-21T18:30:00.000Z",
+                      "status": "ACTIVE",
+                      "isBlocked": false,
+                      "blockReason": null,
+                      "blockedAt": null,
+                      "owner": {
+                        "id": 2,
+                        "fullName": "משפחת כהן",
+                        "email": "cohen@example.com",
+                        "phone": "0501234567"
+                      }
+                    }
+                  ],
+                  "page": 1,
+                  "pageSize": 12,
+                  "total": 1,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "עיר"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "HIDDEN"
+              ]
+            },
+            "description": "סטטוס"
+          },
+          {
+            "name": "isBlocked",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "חסומה או לא"
+          },
+          {
+            "name": "ownerEmail",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "חלק מהמייל",
+            "example": "cohen"
+          },
+          {
+            "name": "ownerPhone",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "חלק מהטלפון",
+            "example": "050-123"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ]
+      }
+    },
+    "/api/admin/apartments/{id}/block": {
+      "post": {
+        "tags": [
+          "ניהול"
+        ],
+        "summary": "חסימת דירה",
+        "description": "חובה סיבה (3 עד 300 תווים), שמוצגת לבעל הדירה. הדירה נעלמת מהחיפוש, וכל ההצעות הממתינות שלה נדחות אוטומטית. החלפות מאושרות נשארות. **הרשאה:** מנהל בלבד. אורח מקבל 401, משתמש רגיל 403.",
+        "operationId": "adminBlockApartment",
+        "responses": {
+          "200": {
+            "description": "נחסמה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "apartment": {
+                      "$ref": "#/components/schemas/ApartmentAdminView"
+                    },
+                    "autoRejectedOffers": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "apartment",
+                    "autoRejectedOffers"
+                  ]
+                },
+                "example": {
+                  "apartment": {
+                    "id": 1,
+                    "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                    "city": {
+                      "id": 1,
+                      "name": "ירושלים"
+                    },
+                    "neighborhood": "רמות",
+                    "rooms": 4,
+                    "beds": 7,
+                    "floor": 2,
+                    "hasElevator": true,
+                    "hasPlata": true,
+                    "hasUrn": true,
+                    "hasShabbatClock": true,
+                    "hasEruv": true,
+                    "hasGenerator": false,
+                    "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "updatedAt": "2026-10-21T18:30:00.000Z",
+                    "status": "ACTIVE",
+                    "isBlocked": true,
+                    "blockReason": "פרטים לא נכונים",
+                    "blockedAt": "2026-10-21T18:30:00.000Z",
+                    "owner": {
+                      "id": 2,
+                      "fullName": "משפחת כהן",
+                      "email": "cohen@example.com",
+                      "phone": "0501234567"
+                    }
+                  },
+                  "autoRejectedOffers": 2
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "כבר חסומה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "ALREADY_BLOCKED",
+                    "message": "הדירה כבר חסומה"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "reason"
+                ]
+              },
+              "example": {
+                "reason": "פרטים לא נכונים במודעה"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/apartments/{id}/unblock": {
+      "post": {
+        "tags": [
+          "ניהול"
+        ],
+        "summary": "שחרור חסימה",
+        "description": "הדירה חוזרת לסטטוס שבעל הדירה בחר. **הרשאה:** מנהל בלבד. אורח מקבל 401, משתמש רגיל 403.",
+        "operationId": "adminUnblockApartment",
+        "responses": {
+          "200": {
+            "description": "שוחררה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "apartment": {
+                      "$ref": "#/components/schemas/ApartmentAdminView"
+                    }
+                  },
+                  "required": [
+                    "apartment"
+                  ]
+                },
+                "example": {
+                  "apartment": {
+                    "id": 1,
+                    "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                    "city": {
+                      "id": 1,
+                      "name": "ירושלים"
+                    },
+                    "neighborhood": "רמות",
+                    "rooms": 4,
+                    "beds": 7,
+                    "floor": 2,
+                    "hasElevator": true,
+                    "hasPlata": true,
+                    "hasUrn": true,
+                    "hasShabbatClock": true,
+                    "hasEruv": true,
+                    "hasGenerator": false,
+                    "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+                    "createdAt": "2026-10-21T18:30:00.000Z",
+                    "updatedAt": "2026-10-21T18:30:00.000Z",
+                    "status": "ACTIVE",
+                    "isBlocked": false,
+                    "blockReason": null,
+                    "blockedAt": null,
+                    "owner": {
+                      "id": 2,
+                      "fullName": "משפחת כהן",
+                      "email": "cohen@example.com",
+                      "phone": "0501234567"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "לא חסומה",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "NOT_BLOCKED",
+                    "message": "הדירה אינה חסומה"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ]
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "tags": [
+          "ניהול"
+        ],
+        "summary": "משתמשים",
+        "description": "חיפוש חלקי לפי שם, מייל ו/או טלפון. קריאה בלבד. **הרשאה:** מנהל בלבד. אורח מקבל 401, משתמש רגיל 403.",
+        "operationId": "adminListUsers",
+        "responses": {
+          "200": {
+            "description": "עמוד",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserPage"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": 2,
+                      "fullName": "משפחת כהן",
+                      "email": "cohen@example.com",
+                      "phone": "0501234567",
+                      "role": "USER",
+                      "createdAt": "2026-10-21T18:30:00.000Z",
+                      "apartment": {
+                        "id": 1,
+                        "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+                        "status": "ACTIVE",
+                        "isBlocked": false
+                      }
+                    }
+                  ],
+                  "page": 1,
+                  "pageSize": 12,
+                  "total": 1,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "חלק מהשם"
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "חלק מהמייל"
+          },
+          {
+            "name": "phone",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "חלק מהטלפון"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ]
+      }
+    },
+    "/api/admin/swaps": {
+      "get": {
+        "tags": [
+          "ניהול"
+        ],
+        "summary": "כל ההחלפות",
+        "description": "סינון לפי דירה (כשולחת או כמקבלת) ולפי סטטוס. קריאה בלבד, לבירור תלונות. **הרשאה:** מנהל בלבד. אורח מקבל 401, משתמש רגיל 403.",
+        "operationId": "adminListSwaps",
+        "responses": {
+          "200": {
+            "description": "עמוד",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSwapPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "apartmentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "דירה"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/SwapStatus"
+            },
+            "description": "סטטוס"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "ה-token שמתקבל מ-POST /api/auth/login או מ-POST /api/auth/register"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "קוד קבוע לזיהוי השגיאה בקוד",
+                "example": "VALIDATION_ERROR"
+              },
+              "message": {
+                "type": "string",
+                "description": "הודעה בעברית להצגה למשתמש",
+                "example": "הנתונים שנשלחו אינם תקינים"
+              },
+              "details": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "example": "email"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "כתובת מייל לא תקינה"
+                    }
+                  },
+                  "required": [
+                    "field",
+                    "message"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "ADMIN"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-21T18:30:00.000Z"
+          }
+        },
+        "example": {
+          "id": 2,
+          "fullName": "משפחת כהן",
+          "email": "cohen@example.com",
+          "phone": "0501234567",
+          "role": "USER",
+          "createdAt": "2026-10-21T18:30:00.000Z"
+        },
+        "required": [
+          "id",
+          "fullName",
+          "email",
+          "phone",
+          "role",
+          "createdAt"
+        ]
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "JWT. נשלח בכותרת Authorization: Bearer <token>"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "description": "תוקף בשניות"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "required": [
+          "token",
+          "expiresIn",
+          "user"
+        ]
+      },
+      "City": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "id": 1,
+          "name": "ירושלים",
+          "isActive": true
+        },
+        "required": [
+          "id",
+          "name",
+          "isActive"
+        ]
+      },
+      "CityRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "ApartmentPublic": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "city": {
+            "$ref": "#/components/schemas/CityRef"
+          },
+          "neighborhood": {
+            "type": "string"
+          },
+          "rooms": {
+            "type": "number",
+            "description": "בקפיצות של 0.5"
+          },
+          "beds": {
+            "type": "integer"
+          },
+          "floor": {
+            "type": "integer"
+          },
+          "hasElevator": {
+            "type": "boolean",
+            "description": "מעלית"
+          },
+          "hasPlata": {
+            "type": "boolean",
+            "description": "פלטה"
+          },
+          "hasUrn": {
+            "type": "boolean",
+            "description": "מיחם"
+          },
+          "hasShabbatClock": {
+            "type": "boolean",
+            "description": "שעוני שבת"
+          },
+          "hasEruv": {
+            "type": "boolean",
+            "description": "עירוב באזור"
+          },
+          "hasGenerator": {
+            "type": "boolean",
+            "description": "גנרטור"
+          },
+          "description": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-21T18:30:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-21T18:30:00.000Z"
+          }
+        },
+        "example": {
+          "id": 1,
+          "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+          "city": {
+            "id": 1,
+            "name": "ירושלים"
+          },
+          "neighborhood": "רמות",
+          "rooms": 4,
+          "beds": 7,
+          "floor": 2,
+          "hasElevator": true,
+          "hasPlata": true,
+          "hasUrn": true,
+          "hasShabbatClock": true,
+          "hasEruv": true,
+          "hasGenerator": false,
+          "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+          "createdAt": "2026-10-21T18:30:00.000Z",
+          "updatedAt": "2026-10-21T18:30:00.000Z"
+        },
+        "required": [
+          "id",
+          "title",
+          "city",
+          "neighborhood",
+          "rooms",
+          "beds",
+          "floor",
+          "hasElevator",
+          "hasPlata",
+          "hasUrn",
+          "hasShabbatClock",
+          "hasEruv",
+          "hasGenerator",
+          "description",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ApartmentOwnerView": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApartmentPublic"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ACTIVE",
+                  "HIDDEN"
+                ]
+              },
+              "isBlocked": {
+                "type": "boolean"
+              },
+              "blockReason": {
+                "type": "string",
+                "nullable": true
+              },
+              "blockedAt": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2026-10-21T18:30:00.000Z",
+                "nullable": true
+              }
+            },
+            "required": [
+              "status",
+              "isBlocked",
+              "blockReason",
+              "blockedAt"
+            ]
+          }
+        ],
+        "example": {
+          "id": 1,
+          "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+          "city": {
+            "id": 1,
+            "name": "ירושלים"
+          },
+          "neighborhood": "רמות",
+          "rooms": 4,
+          "beds": 7,
+          "floor": 2,
+          "hasElevator": true,
+          "hasPlata": true,
+          "hasUrn": true,
+          "hasShabbatClock": true,
+          "hasEruv": true,
+          "hasGenerator": false,
+          "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+          "createdAt": "2026-10-21T18:30:00.000Z",
+          "updatedAt": "2026-10-21T18:30:00.000Z",
+          "status": "ACTIVE",
+          "isBlocked": false,
+          "blockReason": null,
+          "blockedAt": null
+        }
+      },
+      "ApartmentAdminView": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApartmentOwnerView"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "owner": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "fullName": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                },
+                "required": [
+                  "id",
+                  "fullName",
+                  "email",
+                  "phone"
+                ]
+              }
+            },
+            "required": [
+              "owner"
+            ]
+          }
+        ],
+        "example": {
+          "id": 1,
+          "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+          "city": {
+            "id": 1,
+            "name": "ירושלים"
+          },
+          "neighborhood": "רמות",
+          "rooms": 4,
+          "beds": 7,
+          "floor": 2,
+          "hasElevator": true,
+          "hasPlata": true,
+          "hasUrn": true,
+          "hasShabbatClock": true,
+          "hasEruv": true,
+          "hasGenerator": false,
+          "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת.",
+          "createdAt": "2026-10-21T18:30:00.000Z",
+          "updatedAt": "2026-10-21T18:30:00.000Z",
+          "status": "ACTIVE",
+          "isBlocked": false,
+          "blockReason": null,
+          "blockedAt": null,
+          "owner": {
+            "id": 2,
+            "fullName": "משפחת כהן",
+            "email": "cohen@example.com",
+            "phone": "0501234567"
+          }
+        }
+      },
+      "ApartmentInput": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 100
+          },
+          "cityId": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "עיר פעילה מתוך GET /api/cities"
+          },
+          "neighborhood": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          },
+          "rooms": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 20,
+            "multipleOf": 0.5
+          },
+          "beds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "floor": {
+            "type": "integer",
+            "minimum": -3,
+            "maximum": 60
+          },
+          "hasElevator": {
+            "type": "boolean",
+            "description": "מעלית",
+            "default": false
+          },
+          "hasPlata": {
+            "type": "boolean",
+            "description": "פלטה",
+            "default": false
+          },
+          "hasUrn": {
+            "type": "boolean",
+            "description": "מיחם",
+            "default": false
+          },
+          "hasShabbatClock": {
+            "type": "boolean",
+            "description": "שעוני שבת",
+            "default": false
+          },
+          "hasEruv": {
+            "type": "boolean",
+            "description": "עירוב באזור",
+            "default": false
+          },
+          "hasGenerator": {
+            "type": "boolean",
+            "description": "גנרטור",
+            "default": false
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 2000
+          }
+        },
+        "example": {
+          "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+          "cityId": 1,
+          "neighborhood": "רמות",
+          "rooms": 4.5,
+          "beds": 7,
+          "floor": 2,
+          "hasElevator": true,
+          "hasPlata": true,
+          "hasUrn": true,
+          "hasShabbatClock": true,
+          "hasEruv": true,
+          "hasGenerator": false,
+          "description": "דירה מרווחת ומוארת, שתי דקות הליכה מבית הכנסת."
+        },
+        "required": [
+          "title",
+          "cityId",
+          "neighborhood",
+          "rooms",
+          "beds",
+          "floor",
+          "description"
+        ]
+      },
+      "ApartmentResponse": {
+        "type": "object",
+        "properties": {
+          "apartment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApartmentOwnerView"
+              },
+              {
+                "$ref": "#/components/schemas/ApartmentPublic"
+              }
+            ]
+          }
+        },
+        "description": "לבעל הדירה ולמנהל מוחזרים גם status, isBlocked, blockReason, blockedAt. לשאר רק השדות של ApartmentPublic.",
+        "required": [
+          "apartment"
+        ]
+      },
+      "MyApartmentResponse": {
+        "type": "object",
+        "properties": {
+          "apartment": {
+            "$ref": "#/components/schemas/ApartmentOwnerView"
+          }
+        },
+        "required": [
+          "apartment"
+        ]
+      },
+      "ApartmentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApartmentPublic"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total",
+          "totalPages"
+        ]
+      },
+      "BusyRange": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "SWAP",
+              "BLOCKED"
+            ],
+            "description": "SWAP = החלפה מאושרת, BLOCKED = חסימה ידנית"
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate",
+          "reason"
+        ]
+      },
+      "PendingRange": {
+        "type": "object",
+        "properties": {
+          "swapId": {
+            "type": "integer"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "SENT",
+              "RECEIVED"
+            ]
+          }
+        },
+        "required": [
+          "swapId",
+          "startDate",
+          "endDate",
+          "direction"
+        ]
+      },
+      "CalendarResponse": {
+        "type": "object",
+        "properties": {
+          "apartmentId": {
+            "type": "integer"
+          },
+          "from": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "to": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "busyRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BusyRange"
+            }
+          },
+          "pendingRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingRange"
+            },
+            "description": "מוחזר רק לבעל הדירה"
+          }
+        },
+        "required": [
+          "apartmentId",
+          "from",
+          "to",
+          "busyRanges"
+        ]
+      },
+      "BlockedDate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "startDate",
+          "endDate",
+          "note"
+        ]
+      },
+      "BlockedDateInput": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ]
+      },
+      "BlockedDateCreated": {
+        "type": "object",
+        "properties": {
+          "blockedDate": {
+            "$ref": "#/components/schemas/BlockedDate"
+          },
+          "autoRejectedOffers": {
+            "type": "integer",
+            "description": "כמה הצעות ממתינות חופפות נדחו אוטומטית"
+          }
+        },
+        "required": [
+          "blockedDate",
+          "autoRejectedOffers"
+        ]
+      },
+      "ApartmentSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "city": {
+            "$ref": "#/components/schemas/CityRef"
+          },
+          "neighborhood": {
+            "type": "string"
+          },
+          "rooms": {
+            "type": "number"
+          },
+          "beds": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "city",
+          "neighborhood",
+          "rooms",
+          "beds"
+        ]
+      },
+      "SwapStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "APPROVED",
+          "REJECTED",
+          "AUTO_REJECTED",
+          "WITHDRAWN",
+          "CANCELLED",
+          "EXPIRED"
+        ],
+        "description": "PENDING ממתינה, APPROVED מאושרת, REJECTED נדחתה, AUTO_REJECTED נדחתה אוטומטית, WITHDRAWN נמשכה, CANCELLED בוטלה בהסכמה, EXPIRED פג תוקף"
+      },
+      "AllowedActions": {
+        "type": "object",
+        "properties": {
+          "canApprove": {
+            "type": "boolean"
+          },
+          "canReject": {
+            "type": "boolean"
+          },
+          "canWithdraw": {
+            "type": "boolean"
+          },
+          "canRequestCancel": {
+            "type": "boolean"
+          },
+          "canApproveCancel": {
+            "type": "boolean"
+          },
+          "canRejectCancel": {
+            "type": "boolean"
+          },
+          "canWithdrawCancelRequest": {
+            "type": "boolean"
+          }
+        },
+        "description": "אילו פעולות מותרות עכשיו למשתמש המחובר. להצגת כפתורים בלבד; השרת בודק שוב בכל פעולה.",
+        "required": [
+          "canApprove",
+          "canReject",
+          "canWithdraw",
+          "canRequestCancel",
+          "canApproveCancel",
+          "canRejectCancel",
+          "canWithdrawCancelRequest"
+        ]
+      },
+      "CancelRequest": {
+        "type": "object",
+        "properties": {
+          "isOpen": {
+            "type": "boolean"
+          },
+          "requestedById": {
+            "type": "integer"
+          },
+          "requestedByMe": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-21T18:30:00.000Z",
+            "nullable": true
+          }
+        },
+        "required": [
+          "isOpen",
+          "requestedById",
+          "requestedByMe",
+          "reason",
+          "requestedAt"
+        ]
+      },
+      "OtherParty": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "fullName",
+          "email",
+          "phone"
+        ]
+      },
+      "SwapDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SwapStatus"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "SENT",
+              "RECEIVED"
+            ],
+            "nullable": true
+          },
+          "senderApartment": {
+            "$ref": "#/components/schemas/ApartmentSummary"
+          },
+          "receiverApartment": {
+            "$ref": "#/components/schemas/ApartmentSummary"
+          },
+          "cancelRequest": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CancelRequest"
+              }
+            ],
+            "nullable": true
+          },
+          "otherParty": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OtherParty"
+              }
+            ],
+            "nullable": true,
+            "description": "פרטי הקשר של הצד השני. רק לצדדים, ורק בהצעה ממתינה או מאושרת"
+          },
+          "owners": {
+            "type": "object",
+            "properties": {
+              "sender": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "fullName": {
+                    "type": "string"
+                  }
+                }
+              },
+              "receiver": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "fullName": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "description": "למנהל בלבד"
+          },
+          "allowedActions": {
+            "$ref": "#/components/schemas/AllowedActions"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-21T18:30:00.000Z"
+          },
+          "respondedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-21T18:30:00.000Z",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-21T18:30:00.000Z",
+            "nullable": true
+          }
+        },
+        "example": {
+          "id": 2,
+          "status": "PENDING",
+          "startDate": "2026-11-20",
+          "endDate": "2026-11-22",
+          "message": "נשמח לשבת בירושלים.",
+          "direction": "RECEIVED",
+          "senderApartment": {
+            "id": 3,
+            "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+            "city": {
+              "id": 7,
+              "name": "צפת"
+            },
+            "neighborhood": "העיר העתיקה",
+            "rooms": 3.5,
+            "beds": 5
+          },
+          "receiverApartment": {
+            "id": 1,
+            "title": "דירת 4 חדרים מרווחת ליד בית הכנסת",
+            "city": {
+              "id": 1,
+              "name": "ירושלים"
+            },
+            "neighborhood": "רמות",
+            "rooms": 4,
+            "beds": 7
+          },
+          "cancelRequest": null,
+          "otherParty": {
+            "fullName": "משפחת פרידמן",
+            "email": "friedman@example.com",
+            "phone": "0533334444"
+          },
+          "allowedActions": {
+            "canApprove": true,
+            "canReject": true,
+            "canWithdraw": false,
+            "canRequestCancel": false,
+            "canApproveCancel": false,
+            "canRejectCancel": false,
+            "canWithdrawCancelRequest": false
+          },
+          "createdAt": "2026-10-21T18:30:00.000Z",
+          "respondedAt": null,
+          "cancelledAt": null
+        },
+        "required": [
+          "id",
+          "status",
+          "startDate",
+          "endDate",
+          "message",
+          "direction",
+          "senderApartment",
+          "receiverApartment",
+          "cancelRequest",
+          "otherParty",
+          "allowedActions",
+          "createdAt",
+          "respondedAt",
+          "cancelledAt"
+        ]
+      },
+      "SwapResponse": {
+        "type": "object",
+        "properties": {
+          "swap": {
+            "$ref": "#/components/schemas/SwapDetail"
+          }
+        },
+        "required": [
+          "swap"
+        ]
+      },
+      "SwapListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SwapStatus"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "SENT",
+              "RECEIVED"
+            ]
+          },
+          "otherApartment": {
+            "$ref": "#/components/schemas/ApartmentSummary"
+          },
+          "hasOpenCancelRequest": {
+            "type": "boolean"
+          },
+          "cancelRequestedByMe": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-21T18:30:00.000Z"
+          }
+        },
+        "example": {
+          "id": 2,
+          "status": "PENDING",
+          "startDate": "2026-11-20",
+          "endDate": "2026-11-22",
+          "direction": "RECEIVED",
+          "otherApartment": {
+            "id": 3,
+            "title": "דירת נופש 3.5 חדרים עם נוף להרים",
+            "city": {
+              "id": 7,
+              "name": "צפת"
+            },
+            "neighborhood": "העיר העתיקה",
+            "rooms": 3.5,
+            "beds": 5
+          },
+          "hasOpenCancelRequest": false,
+          "cancelRequestedByMe": false,
+          "createdAt": "2026-10-21T18:30:00.000Z"
+        },
+        "required": [
+          "id",
+          "status",
+          "startDate",
+          "endDate",
+          "direction",
+          "otherApartment",
+          "hasOpenCancelRequest",
+          "cancelRequestedByMe",
+          "createdAt"
+        ]
+      },
+      "SwapPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SwapListItem"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total",
+          "totalPages"
+        ]
+      },
+      "AdminSwapListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SwapStatus"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-13"
+          },
+          "senderApartment": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApartmentSummary"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "owner": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "fullName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "receiverApartment": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApartmentSummary"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "owner": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "fullName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "hasOpenCancelRequest": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-21T18:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "startDate",
+          "endDate",
+          "senderApartment",
+          "receiverApartment",
+          "hasOpenCancelRequest",
+          "createdAt"
+        ]
+      },
+      "AdminSwapPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminSwapListItem"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total",
+          "totalPages"
+        ]
+      },
+      "AdminApartmentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApartmentAdminView"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total",
+          "totalPages"
+        ]
+      },
+      "AdminUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "ADMIN"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-21T18:30:00.000Z"
+          },
+          "apartment": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "title": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ACTIVE",
+                  "HIDDEN"
+                ]
+              },
+              "isBlocked": {
+                "type": "boolean"
+              }
+            },
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "fullName",
+          "email",
+          "phone",
+          "role",
+          "createdAt",
+          "apartment"
+        ]
+      },
+      "AdminUserPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUser"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total",
+          "totalPages"
+        ]
+      }
+    },
+    "responses": {
+      "ValidationError": {
+        "description": "נתונים לא תקינים (400). ב-details מופיעה הבעיה בכל שדה",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "VALIDATION_ERROR",
+                "message": "הנתונים שנשלחו אינם תקינים",
+                "details": [
+                  {
+                    "field": "endDate",
+                    "message": "הטווח המקסימלי הוא 14 ימים"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "לא מחובר, או Token לא תקין/פג תוקף (401)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "AUTH_REQUIRED": {
+                "value": {
+                  "error": {
+                    "code": "AUTH_REQUIRED",
+                    "message": "נדרשת התחברות"
+                  }
+                }
+              },
+              "INVALID_TOKEN": {
+                "value": {
+                  "error": {
+                    "code": "INVALID_TOKEN",
+                    "message": "ההתחברות אינה תקינה, יש להתחבר מחדש"
+                  }
+                }
+              },
+              "TOKEN_EXPIRED": {
+                "value": {
+                  "error": {
+                    "code": "TOKEN_EXPIRED",
+                    "message": "פג תוקף ההתחברות, יש להתחבר מחדש"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "מחובר, אבל אין הרשאה לפעולה (403)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "FORBIDDEN",
+                "message": "פעולה זו מותרת למנהל האתר בלבד"
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "לא נמצא, או שאין לך גישה אליו (404)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "NOT_FOUND",
+                "message": "הרשומה לא נמצאה"
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "IdPath": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "description": "מזהה",
+        "example": 1
+      },
+      "Page": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "description": "מספר עמוד"
+      },
+      "PageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 12
+        },
+        "description": "פריטים בעמוד"
+      }
+    }
+  }
+}

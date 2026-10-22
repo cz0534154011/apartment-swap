@@ -1,0 +1,39 @@
+# הגדרות פריסה ל-Render (Blueprint).
+# הדרך המומלצת למתחילים היא ליצור Web Service ידנית לפי START-HERE.md.
+# אם רוצים להשתמש בקובץ הזה כ-Blueprint: Render מחפש אותו בתיקייה הראשית של ה-Repository.
+#   - אם תיקיית backend היא חלק מ-Repository גדול יותר (יחד עם ה-React): העבירו את הקובץ לתיקייה הראשית
+#     והשאירו rootDir: backend.
+#   - אם ה-Repository מכיל רק את השרת: מחקו את השורה rootDir.
+services:
+  - type: web
+    name: apartment-swap-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install --include=dev && npm run build
+    # בהפעלה: עדכון מבנה המסד (Migrations), נתוני בסיס (Seed), ואז הפעלת השרת
+    startCommand: npm run start:prod
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      - key: CORS_ORIGIN
+        sync: false
+      - key: ADMIN_CONTACT_EMAIL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SEED_DEMO_DATA
+        value: "true"
+      - key: DEMO_USER_PASSWORD
+        sync: false
