@@ -20,6 +20,12 @@ import { addDays, todayYmd, ymdToDate } from '../utils/dates.js';
 const prisma = new PrismaClient();
 const isProduction = process.env.NODE_ENV === 'production';
 
+/** ערך של משתנה סביבה; ערך ריק (למשל "ADMIN_EMAIL=" בקובץ .env) נחשב כאילו לא הוגדר */
+function envValue(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  return value ? value : undefined;
+}
+
 const CITIES = ['ירושלים', 'בני ברק', 'בית שמש', 'מודיעין עילית', 'ביתר עילית', 'אלעד', 'צפת', 'טבריה'];
 
 interface DemoUser {
@@ -120,8 +126,8 @@ async function seedCities() {
 }
 
 async function seedAdmin() {
-  const email = (process.env.ADMIN_EMAIL ?? (isProduction ? '' : 'admin@example.com')).trim().toLowerCase();
-  const password = process.env.ADMIN_PASSWORD ?? (isProduction ? '' : 'Admin1234');
+  const email = (envValue('ADMIN_EMAIL') ?? (isProduction ? '' : 'admin@example.com')).toLowerCase();
+  const password = envValue('ADMIN_PASSWORD') ?? (isProduction ? '' : 'Admin1234');
   if (!email || !password) {
     console.log('Admin: skipped (set ADMIN_EMAIL and ADMIN_PASSWORD to create an admin)');
     return;
@@ -144,8 +150,9 @@ async function seedAdmin() {
 }
 
 async function seedDemoData() {
-  const wantDemo = isProduction ? process.env.SEED_DEMO_DATA === 'true' : process.env.SEED_DEMO_DATA !== 'false';
-  const password = process.env.DEMO_USER_PASSWORD ?? (isProduction ? '' : 'Demo1234');
+  const seedDemo = envValue('SEED_DEMO_DATA');
+  const wantDemo = isProduction ? seedDemo === 'true' : seedDemo !== 'false';
+  const password = envValue('DEMO_USER_PASSWORD') ?? (isProduction ? '' : 'Demo1234');
   if (!wantDemo || !password) {
     console.log('Demo data: skipped');
     return;
