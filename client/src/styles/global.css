@@ -1,0 +1,11 @@
+/* =========================================================
+   global.css - הקובץ היחיד שמייבאים בקוד (ב-main.tsx).
+   מייבא את כל קבצי העיצוב לפי הסדר.
+   ========================================================= */
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./layout.css";
+@import "./components.css";
+@import "./calendar.css";
+@import "./utilities.css";

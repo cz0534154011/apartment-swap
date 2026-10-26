@@ -1,0 +1,141 @@
+/* =========================================================
+   base.css - איפוס בסיסי וסגנונות לתגיות HTML
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  text-align: start;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- כותרות ---------- */
+h1,
+h2,
+h3,
+h4 {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+h1 { font-size: var(--font-size-xl); }
+h2 { font-size: var(--font-size-lg); }
+h3 { font-size: var(--font-size-md); }
+h4 { font-size: var(--font-size-base); }
+
+@media (min-width: 1024px) {
+  h1 { font-size: var(--font-size-2xl); }
+}
+
+p {
+  margin: 0 0 var(--space-4);
+}
+
+p:last-child {
+  margin-block-end: 0;
+}
+
+ul,
+ol {
+  margin: 0 0 var(--space-4);
+  padding-inline-start: var(--space-5);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+hr {
+  margin: var(--space-5) 0;
+  border: 0;
+  border-block-start: 1px solid var(--color-border);
+}
+
+/* ---------- קישורים ---------- */
+a {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  color: var(--color-link-hover);
+  text-decoration-thickness: 2px;
+}
+
+/* ---------- טפסים: ירושת גופן ---------- */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* ---------- מיקוד ברור לכל אלמנט אינטראקטיבי ---------- */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- בחירת טקסט ---------- */
+::selection {
+  background-color: var(--color-primary-soft);
+  color: var(--color-text);
+}
+
+/* ---------- קוד ---------- */
+code,
+kbd {
+  font-family: var(--font-family-mono);
+  font-size: 0.9em;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* ---------- כבוד להעדפת "פחות תנועה" ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,195 @@
+/* =========================================================
+   calendar.css - התאמת react-day-picker לאתר
+   הקובץ דורס את react-day-picker/style.css,
+   ולכן חייב להיטען אחריו.
+   ========================================================= */
+
+/* ---------- עטיפה של הלוח (אופציונלי) ---------- */
+.calendar {
+  max-width: 100%;
+  padding: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+}
+
+/* ---------- משתני הספרייה בצבעי האתר ---------- */
+.rdp-root {
+  --rdp-accent-color: var(--color-primary);
+  --rdp-accent-background-color: var(--color-primary-soft);
+  --rdp-today-color: var(--color-primary);
+  --rdp-selected-border: 2px solid var(--color-primary);
+  --rdp-day_button-border-radius: var(--radius-sm);
+  --rdp-disabled-opacity: 0.35;
+  --rdp-outside-opacity: 0.45;
+  --rdp-months-gap: var(--space-5);
+
+  /* גודל תא: 44px, ובטלפון צר קטן לפי רוחב המסך (7 ימים בשורה) */
+  --rdp-day-width: min(44px, calc((100vw - 72px) / 7));
+  --rdp-day-height: min(44px, calc((100vw - 72px) / 7));
+  --rdp-day_button-width: calc(var(--rdp-day-width) - 2px);
+  --rdp-day_button-height: calc(var(--rdp-day-height) - 2px);
+
+  max-width: 100%;
+  font-family: var(--font-family);
+  color: var(--color-text);
+}
+
+.rdp-months {
+  max-width: 100%;
+}
+
+.rdp-month_caption {
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+
+.rdp-weekday {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+.rdp-day_button {
+  transition: background-color var(--transition-fast);
+}
+
+.rdp-day_button:hover:not(:disabled) {
+  background-color: var(--color-primary-softer);
+}
+
+.rdp-day_button:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 1px;
+}
+
+.rdp-today:not(.rdp-outside) .rdp-day_button {
+  font-weight: var(--font-weight-bold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rdp-button_previous,
+.rdp-button_next {
+  border-radius: var(--radius-sm);
+}
+
+.rdp-button_previous:hover:not(:disabled),
+.rdp-button_next:hover:not(:disabled) {
+  background-color: var(--color-primary-softer);
+}
+
+/* ימים מנוטרלים (עבר, מעבר ל-6 חודשים): דהויים */
+.rdp-disabled .rdp-day_button {
+  color: var(--color-text-faint);
+  text-decoration: line-through;
+  text-decoration-color: rgba(0, 0, 0, 0.25);
+  cursor: not-allowed;
+}
+
+/* ---------- ימים מסומנים (דרך modifiersClassNames) ---------- */
+
+/* החלפה מאושרת */
+.day--swap .rdp-day_button,
+.rdp-day.day--swap .rdp-day_button {
+  background-color: var(--day-swap-bg);
+  color: var(--day-swap-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.day--swap .rdp-day_button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+/* חסימה ידנית: אפור עם פסים אלכסוניים */
+.day--blocked .rdp-day_button,
+.rdp-day.day--blocked .rdp-day_button {
+  background-color: var(--day-blocked-bg);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 4px,
+    rgba(255, 255, 255, 0.45) 4px 7px
+  );
+  color: var(--day-blocked-text);
+  font-weight: var(--font-weight-bold);
+}
+
+/* הצעה ממתינה (רק לבעל הדירה) */
+.day--pending .rdp-day_button,
+.rdp-day.day--pending .rdp-day_button {
+  background-color: var(--day-pending-bg);
+  border: 2px dashed var(--day-pending-border);
+  color: var(--day-pending-text);
+  font-weight: var(--font-weight-bold);
+}
+
+/* יום מסומן שגם מנוטרל: רואים את הצבע, בלי קו חוצה */
+.rdp-disabled.day--swap,
+.rdp-disabled.day--blocked,
+.rdp-disabled.day--pending {
+  opacity: 0.6;
+}
+
+.rdp-disabled.day--swap .rdp-day_button,
+.rdp-disabled.day--blocked .rdp-day_button,
+.rdp-disabled.day--pending .rdp-day_button {
+  text-decoration: none;
+}
+
+/* ---------- מקרא מתחת ללוח ---------- */
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  list-style: none;
+}
+
+.calendar-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.calendar-legend__swatch {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 4px;
+  background-color: var(--color-surface);
+}
+
+.calendar-legend__swatch--swap {
+  background-color: var(--day-swap-bg);
+  border-color: var(--day-swap-bg);
+}
+
+.calendar-legend__swatch--blocked {
+  background-color: var(--day-blocked-bg);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 3px,
+    rgba(255, 255, 255, 0.45) 3px 5px
+  );
+  border-color: var(--day-blocked-bg);
+}
+
+.calendar-legend__swatch--pending {
+  background-color: var(--day-pending-bg);
+  border: 2px dashed var(--day-pending-border);
+}
+
+.calendar-legend__swatch--disabled {
+  background-color: var(--color-surface-muted);
+  opacity: 0.6;
+}
+
+.calendar-legend__swatch--free {
+  background-color: var(--color-surface);
+}

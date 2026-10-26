@@ -1,0 +1,819 @@
+<!doctype html>
+<html dir="rtl" lang="he">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>מדריך עיצוב - דירה לדירה</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+    <style>
+      /* עיצוב של עמוד הדוגמאות עצמו בלבד (לא חלק מהאתר) */
+      .sg-section {
+        margin-block-end: var(--space-7);
+        padding-block-start: var(--space-5);
+        border-block-start: 2px solid var(--color-border);
+      }
+      .sg-section > h2 {
+        margin-block-end: var(--space-2);
+      }
+      .sg-demo {
+        margin-block: var(--space-4);
+      }
+      .sg-classes {
+        display: block;
+        margin-block: var(--space-2) var(--space-4);
+        padding: var(--space-2) var(--space-3);
+        background: #2a3338;
+        border-radius: var(--radius-sm);
+        color: #e8f0f1;
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-sm);
+        direction: ltr;
+        text-align: left;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .sg-label {
+        margin: var(--space-4) 0 var(--space-1);
+        color: var(--color-text-muted);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-bold);
+      }
+      .sg-frame {
+        position: relative;
+        min-height: 340px;
+        overflow: hidden;
+        border-radius: var(--radius-md);
+      }
+      .sg-frame .modal-backdrop {
+        position: absolute;
+      }
+      .sg-toc {
+        columns: 2 180px;
+        padding-inline-start: var(--space-5);
+      }
+      .sg-swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+      }
+      .sg-swatch {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-1);
+        font-size: var(--font-size-xs);
+      }
+      .sg-swatch span:first-child {
+        width: 64px;
+        height: 40px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+      }
+      .sg-days {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+      }
+      /* מחקה את תא היום של הספרייה, שלא נטענת בעמוד הזה */
+      :where(.sg-days) .rdp-day_button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border: 2px solid transparent;
+        border-radius: var(--rdp-day_button-border-radius);
+      }
+      .sg-days .rdp-disabled {
+        opacity: var(--rdp-disabled-opacity);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="site">
+      <!-- ========== כותרת עליונה ========== -->
+      <header class="site-header">
+        <div class="site-header__inner">
+          <a class="site-header__brand site-header__brand--with-tagline" href="#">
+            <span class="site-header__name">דירה לדירה</span>
+            <span class="site-header__tagline">החלפת דירות לשבתות וחופשות</span>
+          </a>
+          <nav class="site-nav" aria-label="ניווט ראשי">
+            <ul class="site-nav__list">
+              <li><a class="site-nav__link site-nav__link--active" aria-current="page" href="#">חיפוש דירות</a></li>
+              <li><a class="site-nav__link" href="#">הדירה שלי</a></li>
+              <li><a class="site-nav__link" href="#">לוח התפוסה שלי</a></li>
+              <li><a class="site-nav__link" href="#">ההחלפות שלי</a></li>
+              <li><a class="site-nav__link" href="#">פרופיל</a></li>
+              <li><a class="site-nav__link" href="#">ניהול</a></li>
+            </ul>
+          </nav>
+          <div class="site-header__user">
+            <span>שלום, משפחת כהן</span>
+            <button class="btn btn--ghost btn--small" type="button">יציאה</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="site-main">
+        <div class="page-header">
+          <div class="page-header__text">
+            <h1 class="page-header__title">מדריך עיצוב</h1>
+            <p class="page-header__subtitle">כל הרכיבים של האתר, עם שמות המחלקות להעתקה.</p>
+          </div>
+          <div class="page-header__actions">
+            <a class="btn btn--secondary" href="#buttons">לכפתורים</a>
+          </div>
+        </div>
+
+        <nav aria-label="תוכן העניינים">
+          <ul class="sg-toc">
+            <li><a href="#colors">צבעים</a></li>
+            <li><a href="#layout">מבנה העמוד</a></li>
+            <li><a href="#buttons">כפתורים</a></li>
+            <li><a href="#forms">טפסים</a></li>
+            <li><a href="#filter">טופס סינון</a></li>
+            <li><a href="#apartments">כרטיסי דירות</a></li>
+            <li><a href="#details">רשימת פרטים</a></li>
+            <li><a href="#badges">סטטוסים</a></li>
+            <li><a href="#tabs">לשוניות</a></li>
+            <li><a href="#pagination">מעבר עמודים</a></li>
+            <li><a href="#offers">רשימת הצעות</a></li>
+            <li><a href="#table">טבלה</a></li>
+            <li><a href="#alerts">הודעות</a></li>
+            <li><a href="#contact">פרטי קשר</a></li>
+            <li><a href="#loading">טעינה</a></li>
+            <li><a href="#empty">מצב ריק ו-404</a></li>
+            <li><a href="#modal">חלון קופץ</a></li>
+            <li><a href="#calendar">לוח תפוסה</a></li>
+            <li><a href="#utilities">מחלקות עזר</a></li>
+          </ul>
+        </nav>
+
+        <!-- ========== צבעים ========== -->
+        <section class="sg-section" id="colors">
+          <h2>צבעים</h2>
+          <p class="text-muted">מוגדרים כמשתנים בקובץ tokens.css.</p>
+          <div class="sg-swatches">
+            <div class="sg-swatch"><span style="background: var(--color-primary)"></span><span>--color-primary</span></div>
+            <div class="sg-swatch"><span style="background: var(--color-primary-hover)"></span><span>--color-primary-hover</span></div>
+            <div class="sg-swatch"><span style="background: var(--color-primary-soft)"></span><span>--color-primary-soft</span></div>
+            <div class="sg-swatch"><span style="background: var(--color-accent)"></span><span>--color-accent</span></div>
+            <div class="sg-swatch"><span style="background: var(--color-accent-soft)"></span><span>--color-accent-soft</span></div>
+            <div class="sg-swatch"><span style="background: var(--color-bg)"></span><span>--color-bg</span></div>
+            <div class="sg-swatch"><span style="background: var(--color-surface)"></span><span>--color-surface</span></div>
+            <div class="sg-swatch"><span style="background: var(--color-text)"></span><span>--color-text</span></div>
+            <div class="sg-swatch"><span style="background: var(--color-text-muted)"></span><span>--color-text-muted</span></div>
+            <div class="sg-swatch"><span style="background: var(--color-danger)"></span><span>--color-danger</span></div>
+          </div>
+        </section>
+
+        <!-- ========== מבנה העמוד ========== -->
+        <section class="sg-section" id="layout">
+          <h2>מבנה העמוד</h2>
+          <p>מעטפת האתר: הכותרת העליונה והתחתית של העמוד הזה הן הדוגמה.</p>
+          <code class="sg-classes">.site  >  .site-header > .site-header__inner > .site-header__brand / .site-nav / .site-header__user
+.site-header__brand .site-header__brand--with-tagline > span.site-header__name + span.site-header__tagline
+.site-nav > .site-nav__list > li > .site-nav__link  (+ .site-nav__link--active או .active או aria-current="page")
+.site-main   .container   .container--narrow
+.site-footer > .site-footer__inner > .site-footer__links</code>
+
+          <p class="sg-label">כותרת עמוד</p>
+          <div class="sg-demo card">
+            <div class="page-header">
+              <div class="page-header__text">
+                <h1 class="page-header__title">הדירה שלי</h1>
+                <p class="page-header__subtitle">כאן מפרסמים ועורכים את פרטי הדירה.</p>
+              </div>
+              <div class="page-header__actions">
+                <button class="btn btn--primary" type="button">עריכת הדירה</button>
+              </div>
+            </div>
+          </div>
+          <code class="sg-classes">.page-header > .page-header__text > .page-header__title + .page-header__subtitle
+.page-header > .page-header__actions</code>
+
+          <p class="sg-label">שני טורים (טור אחד בטלפון)</p>
+          <div class="sg-demo two-columns">
+            <div class="two-columns__main card">טור ראשי: פרטי הדירה</div>
+            <div class="two-columns__side card">טור צדדי: לוח התפוסה</div>
+          </div>
+          <code class="sg-classes">.two-columns > .two-columns__main + .two-columns__side
+.two-columns--equal   (שני טורים שווים)</code>
+
+          <p class="sg-label">כרטיס כללי, מקטע וערימה</p>
+          <div class="sg-demo card">
+            <h3 class="card__title">כותרת של כרטיס</h3>
+            <p>תוכן כללי בתוך מסגרת לבנה.</p>
+          </div>
+          <div class="sg-demo card">
+            <p class="text-block">תקנון השימוש באתר החלפת הדירות
+
+1. האתר מאפשר החלפת דירות בין משפחות לשבתות ולחופשות, ללא תשלום.
+2. המשתמש מתחייב למסור פרטים נכונים ומדויקים על עצמו ועל דירתו.</p>
+          </div>
+          <code class="sg-classes">.card > .card__title
+.text-block   (טקסט עם ירידות שורה, כמו התקנון)
+.section > .section__title
+.stack   .stack--small   .stack--large</code>
+        </section>
+
+        <!-- ========== כפתורים ========== -->
+        <section class="sg-section" id="buttons">
+          <h2>כפתורים</h2>
+          <div class="sg-demo btn-group">
+            <button class="btn btn--primary" type="button">שליחת הצעה</button>
+            <button class="btn btn--secondary" type="button">עריכה</button>
+            <button class="btn btn--danger" type="button">מחיקת הדירה</button>
+            <button class="btn btn--ghost" type="button">ביטול</button>
+            <button class="btn" type="button">רגיל</button>
+          </div>
+          <code class="sg-classes">.btn  +  .btn--primary / .btn--secondary / .btn--danger / .btn--ghost</code>
+
+          <p class="sg-label">קטן, מנוטרל, בטעינה</p>
+          <div class="sg-demo btn-group">
+            <button class="btn btn--primary btn--small" type="button">אישור</button>
+            <button class="btn btn--danger btn--small" type="button">דחייה</button>
+            <button class="btn btn--primary" type="button" disabled>שמירה</button>
+            <button class="btn btn--primary btn--loading" type="button" aria-busy="true">שומר...</button>
+          </div>
+          <code class="sg-classes">.btn--small
+disabled   (מאפיין רגיל של button)
+.btn--loading  או  aria-busy="true"</code>
+
+          <p class="sg-label">ברוחב מלא</p>
+          <div class="sg-demo container--narrow">
+            <button class="btn btn--primary btn--block" type="button">התחברות</button>
+          </div>
+          <code class="sg-classes">.btn--block</code>
+
+          <p class="sg-label">קבוצת כפתורים (בטלפון כל כפתור בשורה משלו)</p>
+          <div class="sg-demo btn-group btn-group--stack-mobile">
+            <button class="btn btn--primary" type="button">אישור ההצעה</button>
+            <button class="btn btn--danger" type="button">דחיית ההצעה</button>
+          </div>
+          <code class="sg-classes">.btn-group   .btn-group--stack-mobile</code>
+        </section>
+
+        <!-- ========== טפסים ========== -->
+        <section class="sg-section" id="forms">
+          <h2>טפסים</h2>
+          <div class="sg-demo card">
+            <form class="form" action="#">
+              <div class="form__row">
+                <div class="field">
+                  <label class="field__label" for="sg-title">כותרת הדירה<span class="field__required">*</span></label>
+                  <input class="field__input" id="sg-title" type="text" value="דירת 4 חדרים ליד בית הכנסת" />
+                  <p class="field__hint">כותרת קצרה שתופיע בכרטיס הדירה.</p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="sg-city">עיר</label>
+                  <select class="field__input" id="sg-city">
+                    <option>ירושלים</option>
+                    <option>בני ברק</option>
+                    <option>בית שמש</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form__row">
+                <div class="field field--error">
+                  <label class="field__label" for="sg-neighborhood">שכונה</label>
+                  <input class="field__input" id="sg-neighborhood" type="text" aria-invalid="true" />
+                  <p class="field__error">יש למלא שכונה</p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="sg-rooms">מספר חדרים</label>
+                  <input class="field__input" id="sg-rooms" type="number" value="4" />
+                </div>
+              </div>
+
+              <div class="form__row">
+                <div class="field">
+                  <label class="field__label" for="sg-beds">מספר מיטות</label>
+                  <input class="field__input" id="sg-beds" type="number" value="8" />
+                </div>
+                <div class="field">
+                  <label class="field__label" for="sg-date">תאריך</label>
+                  <input class="field__input" id="sg-date" type="date" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="sg-desc">תיאור</label>
+                <textarea class="field__input" id="sg-desc">דירה מרווחת בקומה שנייה עם מעלית, חמש דקות הליכה מבית הכנסת.</textarea>
+              </div>
+
+              <fieldset class="fieldset">
+                <legend class="fieldset__legend">אביזרי שבת</legend>
+                <div class="checkbox-group">
+                  <label class="checkbox"><input type="checkbox" checked /> פלטה</label>
+                  <label class="checkbox"><input type="checkbox" checked /> מיחם</label>
+                  <label class="checkbox"><input type="checkbox" /> שעוני שבת</label>
+                  <label class="checkbox"><input type="checkbox" checked /> עירוב</label>
+                  <label class="checkbox"><input type="checkbox" /> גנרטור</label>
+                  <label class="checkbox"><input type="checkbox" /> מעלית שבת</label>
+                </div>
+              </fieldset>
+
+              <label class="checkbox"><input type="checkbox" /> קראתי ואני מסכים <a href="#">לתקנון האתר</a></label>
+
+              <div class="form__warning">פרטים לא נכונים עלולים להוביל לחסימת הדירה.</div>
+
+              <div class="form__actions">
+                <button class="btn btn--primary" type="submit">שמירה</button>
+                <button class="btn btn--ghost" type="button">ביטול</button>
+              </div>
+            </form>
+          </div>
+          <code class="sg-classes">.form
+.form__row                          (שדות זה לצד זה במסך רחב)
+.field > .field__label (+ .field__required) + .field__input + .field__hint / .field__error
+.field__input  על input / select / textarea
+.field--error  על השדה, או aria-invalid="true" על הקלט
+.fieldset > .fieldset__legend
+.checkbox-group > label.checkbox > input[type=checkbox] + טקסט
+.form__warning
+.form__actions</code>
+        </section>
+
+        <!-- ========== טופס סינון ========== -->
+        <section class="sg-section" id="filter">
+          <h2>טופס סינון לחיפוש</h2>
+          <form class="sg-demo filter-form" action="#">
+            <div class="field">
+              <label class="field__label" for="sg-f-city">עיר</label>
+              <select class="field__input" id="sg-f-city"><option>כל הערים</option><option>ירושלים</option></select>
+            </div>
+            <div class="field">
+              <label class="field__label" for="sg-f-rooms">מינימום חדרים</label>
+              <input class="field__input" id="sg-f-rooms" type="number" />
+            </div>
+            <div class="field">
+              <label class="field__label" for="sg-f-beds">מינימום מיטות</label>
+              <input class="field__input" id="sg-f-beds" type="number" />
+            </div>
+            <div class="field">
+              <label class="field__label" for="sg-f-date">תאריך</label>
+              <input class="field__input" id="sg-f-date" type="date" />
+            </div>
+            <div class="filter-form__actions">
+              <button class="btn btn--primary" type="submit">חיפוש</button>
+              <button class="btn btn--ghost" type="button">ניקוי</button>
+            </div>
+          </form>
+          <code class="sg-classes">.filter-form > .field ... + .filter-form__actions</code>
+        </section>
+
+        <!-- ========== כרטיסי דירות ========== -->
+        <section class="sg-section" id="apartments">
+          <h2>כרטיסי דירות</h2>
+          <ul class="sg-demo card-grid">
+            <li>
+              <article class="apartment-card">
+                <h3 class="apartment-card__title"><a href="#">דירת 4 חדרים ליד בית הכנסת</a></h3>
+                <p class="apartment-card__location">ירושלים, רמות</p>
+                <ul class="apartment-card__meta">
+                  <li>4 חדרים</li>
+                  <li>8 מיטות</li>
+                </ul>
+                <ul class="tag-list">
+                  <li class="amenity-tag">פלטה</li>
+                  <li class="amenity-tag">מיחם</li>
+                  <li class="amenity-tag">עירוב</li>
+                  <li class="amenity-tag">מעלית</li>
+                </ul>
+                <div class="apartment-card__footer">
+                  <span class="text-muted text-small">משפחת לוי</span>
+                  <a class="btn btn--secondary btn--small" href="#">לפרטים</a>
+                </div>
+              </article>
+            </li>
+            <li>
+              <article class="apartment-card">
+                <h3 class="apartment-card__title"><a href="#">דירת גן מרווחת עם חצר</a></h3>
+                <p class="apartment-card__location">בני ברק, פרדס כץ</p>
+                <ul class="apartment-card__meta">
+                  <li>5 חדרים</li>
+                  <li>10 מיטות</li>
+                </ul>
+                <ul class="tag-list">
+                  <li class="amenity-tag">פלטה</li>
+                  <li class="amenity-tag">שעוני שבת</li>
+                  <li class="amenity-tag">גנרטור</li>
+                </ul>
+                <div class="apartment-card__footer">
+                  <span class="text-muted text-small">משפחת פרידמן</span>
+                  <a class="btn btn--secondary btn--small" href="#">לפרטים</a>
+                </div>
+              </article>
+            </li>
+            <li>
+              <article class="apartment-card">
+                <h3 class="apartment-card__title"><a href="#">דירת 3 חדרים שקטה</a></h3>
+                <p class="apartment-card__location">בית שמש, רמת בית שמש א'</p>
+                <ul class="apartment-card__meta">
+                  <li>3 חדרים</li>
+                  <li>6 מיטות</li>
+                </ul>
+                <ul class="tag-list">
+                  <li class="amenity-tag">מיחם</li>
+                  <li class="amenity-tag">עירוב</li>
+                </ul>
+                <div class="apartment-card__footer">
+                  <span class="text-muted text-small">משפחת גולד</span>
+                  <a class="btn btn--secondary btn--small" href="#">לפרטים</a>
+                </div>
+              </article>
+            </li>
+          </ul>
+          <code class="sg-classes">.card-grid > li > .apartment-card
+.apartment-card > .apartment-card__title + .apartment-card__location + .apartment-card__meta
+                + .tag-list > .amenity-tag
+                + .apartment-card__footer</code>
+        </section>
+
+        <!-- ========== רשימת פרטים ========== -->
+        <section class="sg-section" id="details">
+          <h2>רשימת פרטים</h2>
+          <div class="sg-demo card">
+            <dl class="details-list">
+              <div class="details-list__item">
+                <dt class="details-list__label">עיר ושכונה</dt>
+                <dd class="details-list__value">ירושלים, רמות</dd>
+              </div>
+              <div class="details-list__item">
+                <dt class="details-list__label">כתובת</dt>
+                <dd class="details-list__value">רחוב הרב פרנק 12</dd>
+              </div>
+              <div class="details-list__item">
+                <dt class="details-list__label">חדרים</dt>
+                <dd class="details-list__value">4</dd>
+              </div>
+              <div class="details-list__item">
+                <dt class="details-list__label">מיטות</dt>
+                <dd class="details-list__value">8</dd>
+              </div>
+              <div class="details-list__item">
+                <dt class="details-list__label">אביזרי שבת</dt>
+                <dd class="details-list__value">
+                  <ul class="tag-list">
+                    <li class="amenity-tag">פלטה</li>
+                    <li class="amenity-tag">מיחם</li>
+                    <li class="amenity-tag">עירוב</li>
+                  </ul>
+                </dd>
+              </div>
+            </dl>
+          </div>
+          <code class="sg-classes">dl.details-list > div.details-list__item > dt.details-list__label + dd.details-list__value</code>
+        </section>
+
+        <!-- ========== סטטוסים ========== -->
+        <section class="sg-section" id="badges">
+          <h2>סטטוסים של הצעות</h2>
+          <div class="sg-demo btn-group">
+            <span class="badge badge--pending">ממתינה</span>
+            <span class="badge badge--approved">מאושרת</span>
+            <span class="badge badge--rejected">נדחתה</span>
+            <span class="badge badge--auto-rejected">נדחתה אוטומטית</span>
+            <span class="badge badge--withdrawn">נמשכה</span>
+            <span class="badge badge--cancelled">בוטלה</span>
+            <span class="badge badge--expired">פג תוקף</span>
+          </div>
+          <code class="sg-classes">.badge  +  .badge--pending / .badge--approved / .badge--rejected / .badge--auto-rejected
+          .badge--withdrawn / .badge--cancelled / .badge--expired</code>
+
+          <p class="sg-label">בקשת ביטול פתוחה</p>
+          <div class="sg-demo btn-group">
+            <span class="badge badge--approved">מאושרת</span>
+            <span class="badge badge--cancel-request">בקשת ביטול פתוחה</span>
+          </div>
+          <code class="sg-classes">.badge .badge--cancel-request</code>
+        </section>
+
+        <!-- ========== לשוניות ========== -->
+        <section class="sg-section" id="tabs">
+          <h2>לשוניות</h2>
+          <div class="sg-demo tabs" role="tablist">
+            <button class="tabs__tab tabs__tab--active" role="tab" aria-selected="true" type="button">
+              קיבלתי <span class="tabs__count">3</span>
+            </button>
+            <button class="tabs__tab" role="tab" aria-selected="false" type="button">
+              שלחתי <span class="tabs__count">1</span>
+            </button>
+          </div>
+          <code class="sg-classes">.tabs > .tabs__tab (+ .tabs__tab--active או aria-selected="true") > .tabs__count</code>
+        </section>
+
+        <!-- ========== מעבר עמודים ========== -->
+        <section class="sg-section" id="pagination">
+          <h2>מעבר עמודים</h2>
+          <nav class="sg-demo pagination" aria-label="מעבר בין עמודים">
+            <button class="pagination__btn" type="button" disabled>הקודם</button>
+            <button class="pagination__btn pagination__btn--current" type="button" aria-current="page">1</button>
+            <button class="pagination__btn" type="button">2</button>
+            <button class="pagination__btn" type="button">3</button>
+            <button class="pagination__btn" type="button">הבא</button>
+            <span class="pagination__info">עמוד 1 מתוך 3</span>
+          </nav>
+          <code class="sg-classes">.pagination > .pagination__btn (+ .pagination__btn--current / disabled) + .pagination__info</code>
+        </section>
+
+        <!-- ========== רשימת הצעות ========== -->
+        <section class="sg-section" id="offers">
+          <h2>רשימת הצעות</h2>
+          <ul class="sg-demo offer-list">
+            <li class="offer-item offer-item--highlight">
+              <div class="offer-item__main">
+                <h3 class="offer-item__title"><a href="#">משפחת לוי, בני ברק</a></h3>
+                <ul class="offer-item__meta">
+                  <li>שבת פרשת נח</li>
+                  <li class="ltr">24/10/2026 - 25/10/2026</li>
+                </ul>
+              </div>
+              <div class="offer-item__status">
+                <span class="badge badge--pending">ממתינה</span>
+              </div>
+              <div class="offer-item__actions">
+                <button class="btn btn--primary btn--small" type="button">אישור</button>
+                <button class="btn btn--danger btn--small" type="button">דחייה</button>
+              </div>
+            </li>
+            <li class="offer-item">
+              <div class="offer-item__main">
+                <h3 class="offer-item__title"><a href="#">משפחת פרידמן, ירושלים</a></h3>
+                <ul class="offer-item__meta">
+                  <li>שבת פרשת לך לך</li>
+                  <li class="ltr">31/10/2026 - 01/11/2026</li>
+                </ul>
+              </div>
+              <div class="offer-item__status">
+                <span class="badge badge--approved">מאושרת</span>
+                <span class="badge badge--cancel-request">בקשת ביטול פתוחה</span>
+              </div>
+              <div class="offer-item__actions">
+                <a class="btn btn--secondary btn--small" href="#">לפרטים</a>
+              </div>
+            </li>
+          </ul>
+          <code class="sg-classes">ul.offer-list > li.offer-item (+ .offer-item--highlight)
+.offer-item > .offer-item__main > .offer-item__title + .offer-item__meta
+            + .offer-item__status + .offer-item__actions</code>
+        </section>
+
+        <!-- ========== טבלה ========== -->
+        <section class="sg-section" id="table">
+          <h2>טבלה (מסכי מנהל)</h2>
+          <div class="sg-demo table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>כותרת</th>
+                  <th>עיר</th>
+                  <th>בעלים</th>
+                  <th>מייל</th>
+                  <th>מצב</th>
+                  <th>פעולות</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>דירת 4 חדרים ליד בית הכנסת</td>
+                  <td>ירושלים</td>
+                  <td>משפחת כהן</td>
+                  <td><span class="ltr">cohen@example.com</span></td>
+                  <td><span class="badge badge--approved">פעילה</span></td>
+                  <td>
+                    <div class="table__actions">
+                      <button class="btn btn--danger btn--small" type="button">חסימה</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="table__row--muted">
+                  <td>דירת גן מרווחת</td>
+                  <td>בני ברק</td>
+                  <td>משפחת לוי</td>
+                  <td><span class="ltr">levi@example.com</span></td>
+                  <td><span class="badge badge--rejected">חסומה</span></td>
+                  <td>
+                    <div class="table__actions">
+                      <button class="btn btn--secondary btn--small" type="button">ביטול חסימה</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <code class="sg-classes">.table-wrap > table.table
+.table__row--muted   (שורה חסומה / לא פעילה)
+.table__actions      (div בתוך התא של הפעולות)</code>
+        </section>
+
+        <!-- ========== הודעות ========== -->
+        <section class="sg-section" id="alerts">
+          <h2>הודעות</h2>
+          <div class="sg-demo">
+            <div class="alert alert--info" role="status">
+              <p class="alert__text">אפשר לשלוח הצעה רק לתאריכים פנויים בלוח.</p>
+            </div>
+            <div class="alert alert--success" role="status">
+              <p class="alert__title">ההצעה נשלחה</p>
+              <p class="alert__text">נעדכן אותך כשבעל הדירה יגיב.</p>
+            </div>
+            <div class="alert alert--warning" role="status">
+              <p class="alert__text">עוד לא פרסמת דירה. כדי לשלוח הצעות צריך קודם לפרסם דירה.</p>
+            </div>
+            <div class="alert alert--error" role="alert">
+              <p class="alert__text">אירעה שגיאה בשמירה. נסה שוב.</p>
+            </div>
+          </div>
+          <code class="sg-classes">.alert  +  .alert--info / .alert--success / .alert--warning / .alert--error
+.alert > .alert__title + .alert__text + .alert__actions</code>
+
+          <p class="sg-label">הדירה חסומה על ידי מנהל</p>
+          <div class="sg-demo alert alert--blocked" role="alert">
+            <p class="alert__title">הדירה שלך חסומה על ידי מנהל האתר</p>
+            <p class="alert__text">הדירה לא מוצגת בחיפוש ולא ניתן לשלוח ממנה הצעות.</p>
+            <p class="alert__reason"><strong>סיבה:</strong> מספר החדרים שפורסם אינו תואם למציאות.</p>
+            <p class="alert__text">לבירור: <a class="ltr" href="mailto:admin@example.com">admin@example.com</a></p>
+          </div>
+          <code class="sg-classes">.alert .alert--blocked > .alert__title + .alert__text + .alert__reason</code>
+        </section>
+
+        <!-- ========== פרטי קשר ========== -->
+        <section class="sg-section" id="contact">
+          <h2>תיבת פרטי קשר</h2>
+          <div class="sg-demo contact-box">
+            <h3 class="contact-box__title">פרטי הקשר של משפחת לוי</h3>
+            <ul class="contact-box__list">
+              <li class="contact-box__item"><span class="contact-box__label">שם:</span> יוסף לוי</li>
+              <li class="contact-box__item"><span class="contact-box__label">טלפון:</span> <a class="ltr" href="tel:0501234567">050-1234567</a></li>
+              <li class="contact-box__item"><span class="contact-box__label">מייל:</span> <a class="ltr" href="mailto:levi@example.com">levi@example.com</a></li>
+            </ul>
+          </div>
+          <code class="sg-classes">.contact-box > .contact-box__title + ul.contact-box__list > li.contact-box__item > .contact-box__label</code>
+        </section>
+
+        <!-- ========== טעינה ========== -->
+        <section class="sg-section" id="loading">
+          <h2>טעינה</h2>
+          <div class="sg-demo card">
+            <div class="loading" role="status">
+              <span class="spinner" aria-hidden="true"></span>
+              <p class="loading__text">טוען דירות...</p>
+            </div>
+          </div>
+          <code class="sg-classes">.loading > .spinner + .loading__text
+.loading--inline   .spinner--small</code>
+
+          <div class="sg-demo loading loading--inline" role="status">
+            <span class="spinner spinner--small" aria-hidden="true"></span>
+            <span class="loading__text">שומר...</span>
+          </div>
+
+          <p class="sg-label">שלד טעינה לכרטיסים</p>
+          <div class="sg-demo card-grid" aria-hidden="true">
+            <div class="skeleton">
+              <div class="skeleton__line skeleton__line--title"></div>
+              <div class="skeleton__line skeleton__line--short"></div>
+              <div class="skeleton__line"></div>
+            </div>
+            <div class="skeleton">
+              <div class="skeleton__line skeleton__line--title"></div>
+              <div class="skeleton__line skeleton__line--short"></div>
+              <div class="skeleton__line"></div>
+            </div>
+            <div class="skeleton">
+              <div class="skeleton__line skeleton__line--title"></div>
+              <div class="skeleton__line skeleton__line--short"></div>
+              <div class="skeleton__line"></div>
+            </div>
+          </div>
+          <code class="sg-classes">.skeleton > .skeleton__line (+ .skeleton__line--title / .skeleton__line--short)</code>
+        </section>
+
+        <!-- ========== מצב ריק ו-404 ========== -->
+        <section class="sg-section" id="empty">
+          <h2>מצב ריק</h2>
+          <div class="sg-demo empty-state">
+            <h3 class="empty-state__title">לא נמצאו דירות</h3>
+            <p class="empty-state__text">נסה לשנות את הסינון או לבחור עיר אחרת.</p>
+            <div class="empty-state__actions">
+              <button class="btn btn--secondary" type="button">ניקוי הסינון</button>
+            </div>
+          </div>
+          <code class="sg-classes">.empty-state > .empty-state__title + .empty-state__text + .empty-state__actions</code>
+
+          <p class="sg-label">עמוד "לא נמצא"</p>
+          <div class="sg-demo card">
+            <div class="not-found">
+              <p class="not-found__code">404</p>
+              <h2 class="not-found__title">העמוד לא נמצא</h2>
+              <p class="not-found__text">ייתכן שהקישור שגוי או שהעמוד הוסר.</p>
+              <a class="btn btn--primary" href="#">חזרה לדף הבית</a>
+            </div>
+          </div>
+          <code class="sg-classes">.not-found > .not-found__code + .not-found__title + .not-found__text</code>
+        </section>
+
+        <!-- ========== חלון קופץ ========== -->
+        <section class="sg-section" id="modal">
+          <h2>חלון קופץ</h2>
+          <p class="text-muted">כאן החלון מוצג בתוך מסגרת לדוגמה. באתר הוא מכסה את כל המסך.</p>
+          <div class="sg-demo sg-frame">
+            <div class="modal-backdrop">
+              <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sg-modal-title">
+                <div class="modal__header">
+                  <h2 class="modal__title" id="sg-modal-title">שליחת הצעת החלפה</h2>
+                  <button class="modal__close" type="button" aria-label="סגירה">&times;</button>
+                </div>
+                <div class="modal__body">
+                  <div class="field">
+                    <label class="field__label" for="sg-m-date">תאריך</label>
+                    <input class="field__input" id="sg-m-date" type="date" />
+                  </div>
+                </div>
+                <div class="modal__actions">
+                  <button class="btn btn--ghost" type="button">ביטול</button>
+                  <button class="btn btn--primary" type="button">שליחה</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <code class="sg-classes">דרך א: dialog.modal  (נפתח עם showModal, הרקע הכהה מגיע לבד)
+דרך ב: div.modal-backdrop > div.modal
+.modal > .modal__header > .modal__title + .modal__close
+       + .modal__body + .modal__actions
+.modal-open   (על body, מונע גלילה מאחורי החלון)</code>
+
+          <p class="sg-label">חלון אישור קטן</p>
+          <div class="sg-demo sg-frame" style="min-height: 260px">
+            <div class="modal-backdrop">
+              <div class="modal modal--small" role="alertdialog" aria-modal="true" aria-labelledby="sg-confirm-title">
+                <div class="modal__header">
+                  <h2 class="modal__title" id="sg-confirm-title">מחיקת הדירה</h2>
+                  <button class="modal__close" type="button" aria-label="סגירה">&times;</button>
+                </div>
+                <div class="modal__body">האם אתה בטוח?</div>
+                <div class="modal__actions">
+                  <button class="btn btn--ghost" type="button">לא</button>
+                  <button class="btn btn--danger" type="button">כן, למחוק</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <code class="sg-classes">.modal .modal--small</code>
+        </section>
+
+        <!-- ========== לוח תפוסה ========== -->
+        <section class="sg-section" id="calendar">
+          <h2>לוח תפוסה</h2>
+          <p class="text-muted">את הלוח עצמו אי אפשר להציג בלי React. כאן מוצגים צבעי הימים והמקרא.</p>
+
+          <p class="sg-label">ימים לדוגמה</p>
+          <div class="sg-demo sg-days rdp-root">
+            <div class="rdp-day"><span class="rdp-day_button">12</span></div>
+            <div class="rdp-day day--swap"><span class="rdp-day_button">13</span></div>
+            <div class="rdp-day day--blocked"><span class="rdp-day_button">14</span></div>
+            <div class="rdp-day day--pending"><span class="rdp-day_button">15</span></div>
+            <div class="rdp-day rdp-disabled"><span class="rdp-day_button">3</span></div>
+          </div>
+          <code class="sg-classes">modifiersClassNames:  day--swap / day--blocked / day--pending
+.calendar   (מסגרת לבנה אופציונלית סביב הלוח)</code>
+
+          <p class="sg-label">מקרא</p>
+          <ul class="sg-demo calendar-legend">
+            <li class="calendar-legend__item"><span class="calendar-legend__swatch calendar-legend__swatch--free"></span>פנוי</li>
+            <li class="calendar-legend__item"><span class="calendar-legend__swatch calendar-legend__swatch--swap"></span>החלפה מאושרת</li>
+            <li class="calendar-legend__item"><span class="calendar-legend__swatch calendar-legend__swatch--blocked"></span>חסום</li>
+            <li class="calendar-legend__item"><span class="calendar-legend__swatch calendar-legend__swatch--pending"></span>הצעה ממתינה</li>
+            <li class="calendar-legend__item"><span class="calendar-legend__swatch calendar-legend__swatch--disabled"></span>לא זמין</li>
+          </ul>
+          <code class="sg-classes">ul.calendar-legend > li.calendar-legend__item > span.calendar-legend__swatch
+  + --free / --swap / --blocked / --pending / --disabled</code>
+        </section>
+
+        <!-- ========== מחלקות עזר ========== -->
+        <section class="sg-section" id="utilities">
+          <h2>מחלקות עזר</h2>
+          <p>טלפון בתוך משפט: התקשרו אלינו ל-<span class="ltr">050-1234567</span> או כתבו ל-<span class="ltr">info@example.com</span>.</p>
+          <p class="text-muted text-small">טקסט משני קטן.</p>
+          <code class="sg-classes">.ltr   .visually-hidden
+.text-muted   .text-small   .text-center   .text-start   .text-bold
+.mt-0 / .mt-sm / .mt-md / .mt-lg     .mb-0 / .mb-sm / .mb-md / .mb-lg</code>
+        </section>
+      </main>
+
+      <!-- ========== תחתית ========== -->
+      <footer class="site-footer">
+        <div class="site-footer__inner">
+          <ul class="site-footer__links">
+            <li><a href="#">תקנון וצור קשר</a></li>
+          </ul>
+          <span>מנהל האתר: <a class="ltr" href="mailto:admin@example.com">admin@example.com</a></span>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

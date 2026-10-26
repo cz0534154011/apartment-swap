@@ -1,0 +1,40 @@
+/* =========================================================
+   utilities.css - מחלקות עזר קטנות
+   ========================================================= */
+
+/* מייל, טלפון ומספרים בתוך טקסט עברי */
+.ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* טקסט לקוראי מסך בלבד */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* טקסט */
+.text-muted { color: var(--color-text-muted); }
+.text-small { font-size: var(--font-size-sm); }
+.text-center { text-align: center; }
+.text-start { text-align: start; }
+.text-bold { font-weight: var(--font-weight-bold); }
+
+/* מרווחים בסיסיים */
+.mt-0 { margin-block-start: 0; }
+.mt-sm { margin-block-start: var(--space-2); }
+.mt-md { margin-block-start: var(--space-4); }
+.mt-lg { margin-block-start: var(--space-6); }
+
+.mb-0 { margin-block-end: 0; }
+.mb-sm { margin-block-end: var(--space-2); }
+.mb-md { margin-block-end: var(--space-4); }
+.mb-lg { margin-block-end: var(--space-6); }

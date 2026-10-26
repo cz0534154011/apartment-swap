@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.5",
+    "axios": "^1.20.0",
     "date-fns": "^4.4.0",
     "react": "^19.3.1",
     "react-day-picker": "^10.0.2",

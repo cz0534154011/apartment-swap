@@ -1,0 +1,345 @@
+/* =========================================================
+   layout.css - מבנה העמוד
+   מעטפת, כותרת עליונה, תפריט, תוכן, תחתית, כותרת עמוד, טורים
+   ========================================================= */
+
+/* ---------- מעטפת האתר ---------- */
+.site {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+.container--narrow {
+  max-width: var(--container-narrow);
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-inline: var(--space-5);
+  }
+}
+
+/* ---------- כותרת עליונה ---------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  background-color: var(--color-surface);
+  border-block-end: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  width: 100%;
+  max-width: var(--container-width);
+  min-height: var(--header-height);
+  margin-inline: auto;
+  padding: var(--space-2) var(--space-4);
+}
+
+.site-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-header__brand:hover {
+  color: var(--color-primary-hover);
+  text-decoration: none;
+}
+
+/* שם האתר + שורת הסבר קטנה מתחתיו */
+.site-header__brand--with-tagline {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  line-height: 1.2;
+}
+
+.site-header__name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.01em;
+}
+
+.site-header__tagline {
+  margin-block-start: 2px;
+  padding-block-start: 2px;
+  border-block-start: 1px solid var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+}
+
+/* אזור משתמש מחובר (שם + כפתור יציאה) */
+.site-header__user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ---------- תפריט ניווט ----------
+   בטלפון: שורה אחת שנגללת אופקית בתוך עצמה (לא כל העמוד).
+   במסך רחב: שורה רגילה.                                     */
+.site-nav {
+  order: 3;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.site-nav__list {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0 0 var(--space-1);
+  list-style: none;
+  white-space: nowrap;
+}
+
+.site-nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.site-nav__link:hover {
+  background-color: var(--color-primary-softer);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* קישור פעיל: המחלקה site-nav__link--active,
+   או המחלקה active ש-NavLink מוסיף לבד, או aria-current="page" */
+.site-nav__link--active,
+.site-nav__link.active,
+.site-nav__link[aria-current="page"] {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary-active);
+  font-weight: var(--font-weight-bold);
+}
+
+@media (min-width: 1024px) {
+  .site-nav {
+    order: 0;
+    width: auto;
+    overflow-x: visible;
+  }
+
+  .site-nav__list {
+    padding: 0;
+  }
+
+  .site-nav__link {
+    min-height: 40px;
+  }
+}
+
+/* ---------- תוכן ראשי ---------- */
+.site-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--container-width);
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-4) var(--space-7);
+}
+
+@media (min-width: 640px) {
+  .site-main {
+    padding: var(--space-6) var(--space-5) var(--space-8);
+  }
+}
+
+/* ---------- תחתית ---------- */
+.site-footer {
+  background-color: var(--color-surface);
+  border-block-start: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-5);
+  width: 100%;
+  max-width: var(--container-width);
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-4);
+}
+
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer a {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: var(--color-primary-active);
+  text-decoration: underline;
+}
+
+/* ---------- כותרת עמוד ---------- */
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-block-end: var(--space-5);
+}
+
+.page-header__text {
+  min-width: 0;
+}
+
+.page-header__title {
+  display: inline-block;
+  margin: 0;
+  color: var(--color-primary-active);
+}
+
+/* קו בצבע המשני מתחת לכותרת העמוד, באורך הכותרת */
+.page-header__title::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 3px;
+  margin-block-start: var(--space-2);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
+}
+
+.page-header__subtitle {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+}
+
+.page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (min-width: 640px) {
+  .page-header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .page-header__actions {
+    flex-shrink: 0;
+  }
+}
+
+/* ---------- אזור/מקטע בעמוד ---------- */
+.section {
+  margin-block-end: var(--space-6);
+}
+
+.section__title {
+  margin-block-end: var(--space-4);
+  font-size: var(--font-size-lg);
+}
+
+/* ---------- שני טורים ----------
+   בטלפון: טור אחד. ממחשב ומעלה: טור ראשי רחב וטור צדדי.  */
+.two-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.two-columns__main,
+.two-columns__side {
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .two-columns {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: var(--space-6);
+  }
+
+  .two-columns--equal {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* ---------- רשת כרטיסים: 1 / 2 / 3 בשורה ---------- */
+.card-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ---------- ערימה אנכית עם רווח קבוע ---------- */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stack--small {
+  gap: var(--space-2);
+}
+
+.stack--large {
+  gap: var(--space-6);
+}
