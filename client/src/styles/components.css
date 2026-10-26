@@ -385,6 +385,69 @@ input[type="tel"].field__input {
   }
 }
 
+/* שדה סיסמה עם כפתור "הצגה / הסתרה" בתוך השדה */
+.password-field {
+  position: relative;
+}
+
+.password-field .field__input {
+  padding-inline-end: 5.5rem;
+}
+
+.password-field__toggle {
+  position: absolute;
+  inset-block: 4px;
+  inset-inline-end: 4px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--space-3);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.password-field__toggle:hover {
+  background-color: var(--color-primary-softer);
+  color: var(--color-primary-active);
+}
+
+/* תקנון שנפתח ונסגר בתוך טופס (תגית details) */
+.terms-box {
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.terms-box__summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--control-height);
+  padding: 0 var(--space-3);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.terms-box__summary:hover {
+  color: var(--color-primary-active);
+}
+
+.terms-box__text {
+  max-height: 220px;
+  margin: 0;
+  padding: var(--space-3);
+  overflow-y: auto;
+  border-block-start: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
 /* תזכורת בולטת מעל כפתור שמירה */
 .form__warning {
   display: flex;

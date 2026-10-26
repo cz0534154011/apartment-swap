@@ -304,6 +304,15 @@ disabled   (מאפיין רגיל של button)
                 <textarea class="field__input" id="sg-desc">דירה מרווחת בקומה שנייה עם מעלית, חמש דקות הליכה מבית הכנסת.</textarea>
               </div>
 
+              <div class="field">
+                <label class="field__label" for="sg-password">סיסמה</label>
+                <div class="password-field">
+                  <input class="field__input" id="sg-password" type="password" value="abc12345" />
+                  <button class="password-field__toggle" type="button">הצגה</button>
+                </div>
+                <p class="field__hint">לפחות 8 תווים, אות אחת וספרה אחת</p>
+              </div>
+
               <fieldset class="fieldset">
                 <legend class="fieldset__legend">אביזרי שבת</legend>
                 <div class="checkbox-group">
@@ -316,7 +325,16 @@ disabled   (מאפיין רגיל של button)
                 </div>
               </fieldset>
 
-              <label class="checkbox"><input type="checkbox" /> קראתי ואני מסכים <a href="#">לתקנון האתר</a></label>
+              <details class="terms-box">
+                <summary class="terms-box__summary">הצגת התקנון</summary>
+                <p class="terms-box__text">תקנון השימוש באתר החלפת הדירות
+
+1. האתר מאפשר החלפת דירות בין משפחות לשבתות ולחופשות, ללא תשלום.
+2. המשתמש מתחייב למסור פרטים נכונים ומדויקים על עצמו ועל דירתו.
+3. שליחת הצעת החלפה ואישורה מהווים התחייבות הדדית בין שני הצדדים.</p>
+              </details>
+
+              <label class="checkbox"><input type="checkbox" /> קראתי ואני מסכים לתקנון האתר</label>
 
               <div class="form__warning">פרטים לא נכונים עלולים להוביל לחסימת הדירה.</div>
 
@@ -330,9 +348,11 @@ disabled   (מאפיין רגיל של button)
 .form__row                          (שדות זה לצד זה במסך רחב)
 .field > .field__label (+ .field__required) + .field__input + .field__hint / .field__error
 .field__input  על input / select / textarea
+.password-field > input.field__input + button.password-field__toggle   (סיסמה עם כפתור הצגה)
 .field--error  על השדה, או aria-invalid="true" על הקלט
 .fieldset > .fieldset__legend
 .checkbox-group > label.checkbox > input[type=checkbox] + טקסט
+details.terms-box > summary.terms-box__summary + p.terms-box__text
 .form__warning
 .form__actions</code>
         </section>
