@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getApartment } from "../api/apartments";
 import AmenityTags from "../components/AmenityTags";
 import AvailabilityCalendar from "../components/AvailabilityCalendar";
-import OfferMadal from "../components/OfferModal";
+import OfferModal from "../components/OfferModal";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
@@ -88,7 +88,7 @@ function ApartmentDetailsPage() {
                         </div>
                     </div>
                     {isOfferOpen &&
-                        <OfferMadal apartmentId={Number(id)} onClose={() => setIsOfferOpen(false)} />
+                        <OfferModal apartmentId={Number(id)} onClose={() => setIsOfferOpen(false)} />
 
                     }
                 </>
