@@ -41,7 +41,7 @@ async function apiRequest(path: string, options?: AxiosRequestConfig) {
             if (error.response) {
 
                 throw new ApiError(
-                   error.response.data?.error?.message??"אירעה שגיאה",
+                   error.response.data?.error?.details?.[0]?.message??error.response.data?.error?.message??"אירעה שגיאה",
                     error.response.status,
                     error.response.data?.error?.code  
                    

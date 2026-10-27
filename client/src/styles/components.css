@@ -500,6 +500,66 @@ input[type="tel"].field__input {
   align-items: flex-end;
 }
 
+/* קבוצת תיבות סימון (אביזרים) בתוך טופס הסינון: שורה מלאה משלה */
+.filter-form .fieldset {
+  grid-column: 1 / -1;
+}
+
+/* טופס סינון שנפתח ונסגר בלחיצה (details + summary) */
+.filter-panel {
+  margin-block-end: var(--space-5);
+}
+
+.filter-panel__summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: 0 var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-panel__summary::-webkit-details-marker {
+  display: none;
+}
+
+/* חץ קטן שמסתובב כשהטופס פתוח */
+.filter-panel__summary::after {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  border-inline-end: 2px solid currentColor;
+  border-block-end: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.15s ease;
+}
+
+.filter-panel[open] > .filter-panel__summary::after {
+  transform: rotate(-135deg) translateY(-2px);
+}
+
+.filter-panel__summary:hover {
+  background-color: var(--color-primary-softer);
+  border-color: var(--color-primary-soft);
+}
+
+.filter-panel[open] > .filter-panel__summary {
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}
+
+.filter-panel > .filter-form {
+  margin-block: var(--space-3) 0;
+}
+
 @media (min-width: 640px) {
   .filter-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));

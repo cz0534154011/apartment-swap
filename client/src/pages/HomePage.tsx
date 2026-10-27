@@ -2,11 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import ApartmentCard from "../components/ApartmentCard";
 import { searchApartments, type SearchFilters } from "../api/apartments";
 import { useState } from "react";
+import FilterForm from "../components/FilterForm";
 
 function HomePage() {
+   const [filters,setFilters]=useState<SearchFilters>({});
    const { data, error, isLoading } = useQuery({
-      queryKey: ["apartments"],
-      queryFn: () => searchApartments({})
+      queryKey: ["apartments",filters],
+      queryFn: () => searchApartments(filters)
    })
    return (
       <>
@@ -16,6 +18,8 @@ function HomePage() {
                <p className="page-header__subtitle">מצאו דירה להחלפה לשבת או לחופשה</p>
             </div>
          </div>
+         <FilterForm onSearch={setFilters}></FilterForm>
+         {filters.from && filters.to && <p className="text-muted">דירות פנויות מ-<span className="ltr">{filters.from}</span> עד <span className="ltr">{filters.to}</span></p>}
          {isLoading &&
             <div className="loading">
                <span className="spinner"></span>
@@ -36,7 +40,7 @@ function HomePage() {
          {data && data.items.length > 0 &&
             <ul className="card-grid">{data.items.map((apartment) => (
                <li key={apartment.id}>
-                  {ApartmentCard({ apartment })}
+                  <ApartmentCard apartment={apartment}/>
                </li>
             ))}</ul>
          }

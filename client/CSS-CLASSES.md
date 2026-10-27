@@ -164,6 +164,17 @@
 | התגית `form` | `filter-form` |
 | כל שדה בתוכו | `field` (כמו בסעיף 5, עם `field__label` ו-`field__input`) |
 | ה-div של כפתורי החיפוש והניקוי | `filter-form__actions` |
+| קבוצת אביזרים: `fieldset` עם `checkbox-group` (כמו בסעיף 5) | `fieldset` (בתוך הטופס תופס שורה מלאה לבד) |
+
+**טופס שנפתח בלחיצה (אופציונלי):** לעטוף את ה-`form` בתגית `details`, בלי state.
+
+| אלמנט | מחלקה |
+|---|---|
+| התגית `details` שעוטפת את הטופס | `filter-panel` |
+| התגית `summary` (הכפתור שלוחצים עליו), לפני ה-`form` | `filter-panel__summary` |
+| ה-`form` עצמו, אחרי ה-summary | `filter-form` (כרגיל) |
+
+ה-summary נראה ככפתור עם חץ שמסתובב כשהטופס פתוח.
 
 ---
 
