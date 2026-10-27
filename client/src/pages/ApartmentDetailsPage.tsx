@@ -1,10 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getApartment, getCalendar } from "../api/apartments";
+import { getApartment } from "../api/apartments";
 import AmenityTags from "../components/AmenityTags";
-import { DayPicker } from "react-day-picker";
-import { he } from "date-fns/locale";
-import { addMonths } from "date-fns";
+import AvailabilityCalendar from "../components/AvailabilityCalendar";
 
 function ApartmentDetailsPage() {
     const { id } = useParams()
@@ -12,13 +10,6 @@ function ApartmentDetailsPage() {
         queryKey: ["apartment", id],
         queryFn: () => getApartment(Number(id))
     })
-    const { data: calendar } = useQuery({
-        queryKey: ["calendar", id],
-        queryFn: () => getCalendar(Number(id))
-    })
-    const swapDays = calendar?.busyRanges?.filter((range) => range.reason === "SWAP").map((range) => ({ from: new Date(range.startDate), to: new Date(range.endDate) }))
-    const blockedDays = calendar?.busyRanges?.filter((range) => range.reason === "BLOCKED").map((range) => ({ from: new Date(range.startDate), to: new Date(range.endDate) }))
-    const maxDate = addMonths(new Date(), 6)
     return (
         <>
             {isLoading &&
@@ -64,31 +55,7 @@ function ApartmentDetailsPage() {
                             <p className="text-block">{data.apartment.description}</p>
                         </div>
                         <div className="two-columns__side">
-                            <div className="calendar">
-                                <DayPicker
-                                    dir="rtl" locale={he}
-                                    startMonth={new Date()}
-                                    disabled={[{ before: new Date() },{after:maxDate}]}
-                                    modifiers={{ swap: swapDays, blocked: blockedDays }} 
-                                    modifiersClassNames={{ swap: "day--swap", blocked: "day--blocked" }} 
-                                    endMonth={maxDate}
-                                    />
-                            </div>
-                            <ul className="calendar-legend">
-                                <li className="calendar-legend__item">
-                                    <span className="calendar-legend__swatch calendar-legend__swatch--free"></span>
-                                    פנוי
-                                </li>
-                                <li className="calendar-legend__item">
-                                    <span className="calendar-legend__swatch calendar-legend__swatch--swap"></span>
-                                    החלפה מאושרת
-                                </li>
-                                <li className="calendar-legend__item">
-                                    <span className="calendar-legend__swatch calendar-legend__swatch--blocked"></span>
-                                    חסום
-                                </li>
-                            </ul>
-
+                            <AvailabilityCalendar apartmentId={Number(id)}/>
                         </div>
                     </div>
                 </>
