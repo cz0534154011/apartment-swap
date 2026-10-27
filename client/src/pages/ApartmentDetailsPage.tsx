@@ -1,10 +1,15 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getApartment } from "../api/apartments";
 import AmenityTags from "../components/AmenityTags";
 import AvailabilityCalendar from "../components/AvailabilityCalendar";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 function ApartmentDetailsPage() {
+    const { user, hasApartment, isLoading: authLoading } = useAuth()
+    const [isOfferOpen, setOfferOpen] = useState(false);
+
     const { id } = useParams()
     const { data, error, isLoading } = useQuery({
         queryKey: ["apartment", id],
@@ -29,6 +34,25 @@ function ApartmentDetailsPage() {
                         <div className="page-header__text">
                             <h1 className="page-header__title">{data.apartment.title}</h1>
                             <p className="page-header__subtitle">{data.apartment.city.name}, {data.apartment.neighborhood}</p>
+                        </div>
+                        <div className="page-header__actions">
+                            {!authLoading && !user &&
+                                <p className="text-muted">
+                                    כדי לשלוח הצעה יש
+                                    {" "}
+                                    <Link to={"/login"}>להתחבר</Link>
+                                </p>
+                            }
+                            {user?.role === "USER" && !hasApartment &&
+                                <p className="text-muted">
+                                    כדי לשלוח הצעה יש
+                                    {" "}
+                                    <Link to={"/my-apartment"}>לפרסם את הדירה שלך</Link>
+                                </p>
+                            }
+                            {user?.role==="USER" && hasApartment &&
+                                <button className="btn btn--primary" type="button" onClick={()=>setOfferOpen(!isOfferOpen)}>שליחת הצעה</button>
+                            }
                         </div>
                     </div>
                     <div className="two-columns">
@@ -55,7 +79,7 @@ function ApartmentDetailsPage() {
                             <p className="text-block">{data.apartment.description}</p>
                         </div>
                         <div className="two-columns__side">
-                            <AvailabilityCalendar apartmentId={Number(id)}/>
+                            <AvailabilityCalendar apartmentId={Number(id)} />
                         </div>
                     </div>
                 </>
