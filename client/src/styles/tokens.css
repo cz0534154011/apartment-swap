@@ -80,8 +80,10 @@
   --status-expired-border: #d7dce0;
 
   /* ---------- לוח תפוסה ---------- */
-  --day-swap-bg: var(--color-primary);
-  --day-swap-text: #ffffff;
+  --day-swap-bg: #f2d6d0;      /* ורוד-אדמדם רך: "תפוס" */
+  --day-swap-hover: #ebc5bd;
+  --day-swap-border: #d39a8f;
+  --day-swap-text: #7f3329;
   --day-blocked-bg: #d5cfc6;
   --day-blocked-text: #2c2620;
   --day-pending-bg: #fff1d6;
