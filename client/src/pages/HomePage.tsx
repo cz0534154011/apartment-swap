@@ -5,9 +5,9 @@ import { useState } from "react";
 import FilterForm from "../components/FilterForm";
 
 function HomePage() {
-   const [filters,setFilters]=useState<SearchFilters>({});
+   const [filters, setFilters] = useState<SearchFilters>({});
    const { data, error, isLoading } = useQuery({
-      queryKey: ["apartments",filters],
+      queryKey: ["apartments", filters],
       queryFn: () => searchApartments(filters)
    })
    return (
@@ -40,9 +40,16 @@ function HomePage() {
          {data && data.items.length > 0 &&
             <ul className="card-grid">{data.items.map((apartment) => (
                <li key={apartment.id}>
-                  <ApartmentCard apartment={apartment}/>
+                  <ApartmentCard apartment={apartment} />
                </li>
             ))}</ul>
+         }
+         {data && data.totalPages > 1 &&
+            <nav className="pagination">
+               <button className="pagination__btn" type="button" disabled={data.page === 1} onClick={() => setFilters({ ...filters, page: data.page - 1 })} >הקודם</button>
+               <span className="pagination__info">עמוד {data.page} מתוך {data.totalPages}</span>
+               <button className="pagination__btn" type="button" disabled={data.page === data.totalPages} onClick={() => setFilters({ ...filters, page: data.page + 1 })} >הבא</button>
+            </nav>
          }
       </>
    )

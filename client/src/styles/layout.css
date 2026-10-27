@@ -307,6 +307,19 @@
   min-width: 0;
 }
 
+/* טור ראשי שהוא גם card: ריווח פנימי נדיב יותר */
+@media (min-width: 640px) {
+  .two-columns__main.card {
+    padding: var(--space-6);
+  }
+}
+
+/* רווח קבוע בין החלקים שבתוך כל טור (פרטים, תגיות, תיאור, לוח, מקרא) */
+.two-columns__main > * + *,
+.two-columns__side > * + * {
+  margin-block-start: var(--space-5);
+}
+
 @media (min-width: 1024px) {
   .two-columns {
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);

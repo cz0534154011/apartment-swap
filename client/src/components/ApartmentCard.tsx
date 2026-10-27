@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { type Apartment } from "../api/apartments";
-import { AMENITIES } from "../utils/amenities";
+import AmenityTags from "./AmenityTags";
 
 export type ApartmentCardProps = {
     apartment: Apartment;
@@ -14,14 +14,7 @@ function ApartmentCard({ apartment }: ApartmentCardProps) {
                 <li>{apartment.rooms} חדרים</li>
                 <li>{apartment.beds} מיטות</li>
             </ul>
-            <ul className="tag-list">
-                {AMENITIES.map(
-                    (amenity) => (apartment[amenity.key] &&
-                        <li className="amenity-tag" key={amenity.key}>
-                            {amenity.label}
-                        </li>)
-                )}
-            </ul>
+            <AmenityTags apartment={apartment}/>
             <div className="apartment-card__footer">
                 <Link className="btn btn--secondary btn--small" to={"/apartments/" + apartment.id}>לפרטים</Link>
             </div>
