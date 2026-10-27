@@ -1,12 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import { getSiteInfo } from "../api/site";
+// import { useQuery } from "@tanstack/react-query";
+import { useSiteInfo } from "../hooks/useSiteInfo";
 
 function TermsPage() {
 
-    const { data, error, isPending } = useQuery({
-        queryKey: ["siteInfo"],
-        queryFn: getSiteInfo
-    })
+    const { data, error, isPending } = useSiteInfo()
     if (isPending) {
         return <div className="loading">
             <span className="spinner"></span>
@@ -30,7 +27,6 @@ function TermsPage() {
               <section className="contact-box mt-lg">
                 <h2 className="contact-box__title">צור קשר</h2>
                 <p>לשאלות ופניות: <a className="ltr" href={`mailto:${data.adminContactEmail}`}>{data.adminContactEmail}</a></p>
-                
             </section>
 
 

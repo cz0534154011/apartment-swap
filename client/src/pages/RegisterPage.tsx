@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getSiteInfo } from "../api/site";
+import { useMutation } from "@tanstack/react-query";
+import { useSiteInfo  } from "../hooks/useSiteInfo";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { type RegisterData } from "../api/auth";
@@ -19,10 +19,7 @@ function RegisterPage() {
         mutationFn: registerUser,
         onSuccess: () => navigate("/my-apartment")
     })
-    const { data: siteInfo } = useQuery({
-        queryKey: ["siteInfo"],
-        queryFn: getSiteInfo
-    })
+    const { data: siteInfo } = useSiteInfo()
     function onSubmit(data: RegisterData) {
         mutate(data);
     }

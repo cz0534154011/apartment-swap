@@ -1,8 +1,10 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext";
+import { useSiteInfo } from "../hooks/useSiteInfo";
 
 function Layout() {
     const { user, isLoading, logout } = useAuth();
+    const {data:siteInfo} = useSiteInfo()
     const navigate = useNavigate();
 
     function handleLogout() {
@@ -86,7 +88,7 @@ function Layout() {
                             <Link to={'/terms'}>תקנון וצור קשר</Link>
                         </li>
                     </ul>
-                    <span>מנהל האתר: <a className="ltr" href="mailto:cz0534154011@gmail.com">cz0534154011@gmail.com</a></span>
+                    <span>מנהל האתר: <a className="ltr" href={`mailto:${siteInfo?.adminContactEmail}`}>{siteInfo?.adminContactEmail}</a></span>
                 </div>
             </footer>
         </div>
