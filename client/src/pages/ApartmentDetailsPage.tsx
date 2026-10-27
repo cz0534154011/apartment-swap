@@ -6,6 +6,7 @@ import AvailabilityCalendar from "../components/AvailabilityCalendar";
 import OfferModal from "../components/OfferModal";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { getMyApartment } from "../api/myApartment";
 
 function ApartmentDetailsPage() {
     const { user, hasApartment, isLoading: authLoading } = useAuth()
@@ -16,6 +17,13 @@ function ApartmentDetailsPage() {
         queryKey: ["apartment", id],
         queryFn: () => getApartment(Number(id))
     })
+    const { data: myApartmentData } = useQuery({
+        queryKey: ["myApartment"],
+        queryFn:getMyApartment,
+        retry: false,
+        enabled: hasApartment
+    })
+    const isMyApartment = myApartmentData?.apartment.id === Number(id)
     return (
         <>
             {isLoading &&
@@ -55,7 +63,7 @@ function ApartmentDetailsPage() {
                                     <Link to={"/my-apartment"}>לפרסם את הדירה שלך</Link>
                                 </p>
                             }
-                            {user?.role === "USER" && hasApartment &&
+                            {user?.role === "USER" && hasApartment && !isMyApartment &&
                                 <button className="btn btn--primary" type="button" onClick={() => setIsOfferOpen(true)}>שליחת הצעה</button>
                             }
                         </div>
