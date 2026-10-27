@@ -15,6 +15,7 @@ export type FilterFormValues = {
 export type FilterFormProps = {
     onSearch: (filters: SearchFilters) => void
 }
+
 function FilterForm({ onSearch }: FilterFormProps) {
     const { data: cities } = useQuery({
         queryKey: ["cities"],
@@ -32,7 +33,6 @@ function FilterForm({ onSearch }: FilterFormProps) {
             q: data.q || undefined
         })
     }
-
     function handleClear() {
         reset();
         onSearch({})
@@ -76,7 +76,7 @@ function FilterForm({ onSearch }: FilterFormProps) {
                 </fieldset>
                 <div className="filter-form__actions">
                     <button className="btn btn--primary" type="submit">חיפוש</button>
-                    <button className="btn btn--ghost" type="submit" onClick={handleClear}>ניקוי</button>
+                    <button className="btn btn--ghost" type="button" onClick={handleClear}>ניקוי</button>
                 </div>
             </form>
         </details>
