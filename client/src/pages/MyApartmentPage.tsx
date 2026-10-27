@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { getMyApartment } from "../api/myApartment"
 import { ApiError } from "../api/client";
+import  ApartmentForm from "../components/ApartmentForm";
 
 function MyApartmentPage() {
     const { data, error, isLoading } = useQuery({
@@ -29,10 +30,10 @@ function MyApartmentPage() {
                 </div>
             }
             {noApartment &&
-                <p className="text-muted">כאן יהיה טופס פרסום</p>
+                <ApartmentForm/>
             }
             {data &&
-                <p>{data.apartment.title}</p>
+                <ApartmentForm apartment={data.apartment} />
             }
 
         </>
