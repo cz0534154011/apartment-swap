@@ -748,16 +748,28 @@ details.terms-box > summary.terms-box__summary + p.terms-box__text
                   <h2 class="modal__title" id="sg-modal-title">שליחת הצעת החלפה</h2>
                   <button class="modal__close" type="button" aria-label="סגירה">&times;</button>
                 </div>
-                <div class="modal__body">
-                  <div class="field">
-                    <label class="field__label" for="sg-m-date">תאריך</label>
-                    <input class="field__input" id="sg-m-date" type="date" />
+                <form class="modal__form">
+                  <div class="modal__body">
+                    <div class="form__row">
+                      <div class="field">
+                        <label class="field__label" for="sg-m-start">מתאריך</label>
+                        <input class="field__input" id="sg-m-start" type="date" />
+                      </div>
+                      <div class="field">
+                        <label class="field__label" for="sg-m-end">עד תאריך</label>
+                        <input class="field__input" id="sg-m-end" type="date" />
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label class="field__label" for="sg-m-message">הודעה</label>
+                      <textarea class="field__input" id="sg-m-message">נשמח לשבת בירושלים.</textarea>
+                    </div>
                   </div>
-                </div>
-                <div class="modal__actions">
-                  <button class="btn btn--ghost" type="button">ביטול</button>
-                  <button class="btn btn--primary" type="button">שליחה</button>
-                </div>
+                  <div class="modal__actions">
+                    <button class="btn btn--ghost" type="button">ביטול</button>
+                    <button class="btn btn--primary" type="button">שליחה</button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
@@ -765,6 +777,7 @@ details.terms-box > summary.terms-box__summary + p.terms-box__text
 דרך ב: div.modal-backdrop > div.modal
 .modal > .modal__header > .modal__title + .modal__close
        + .modal__body + .modal__actions
+עם טופס: .modal > .modal__header + form.modal__form > .modal__body + .modal__actions
 .modal-open   (על body, מונע גלילה מאחורי החלון)</code>
 
           <p class="sg-label">חלון אישור קטן</p>

@@ -3,12 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { getApartment } from "../api/apartments";
 import AmenityTags from "../components/AmenityTags";
 import AvailabilityCalendar from "../components/AvailabilityCalendar";
+import OfferMadal from "../components/OfferModal";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 function ApartmentDetailsPage() {
     const { user, hasApartment, isLoading: authLoading } = useAuth()
-    const [isOfferOpen, setOfferOpen] = useState(false);
+    const [isOfferOpen, setIsOfferOpen] = useState(false);
 
     const { id } = useParams()
     const { data, error, isLoading } = useQuery({
@@ -41,6 +42,10 @@ function ApartmentDetailsPage() {
                                     כדי לשלוח הצעה יש
                                     {" "}
                                     <Link to={"/login"}>להתחבר</Link>
+                                    {" "}
+                                    או
+                                    {" "}
+                                    <Link to={"/register"}>להירשם</Link>
                                 </p>
                             }
                             {user?.role === "USER" && !hasApartment &&
@@ -50,8 +55,8 @@ function ApartmentDetailsPage() {
                                     <Link to={"/my-apartment"}>לפרסם את הדירה שלך</Link>
                                 </p>
                             }
-                            {user?.role==="USER" && hasApartment &&
-                                <button className="btn btn--primary" type="button" onClick={()=>setOfferOpen(!isOfferOpen)}>שליחת הצעה</button>
+                            {user?.role === "USER" && hasApartment &&
+                                <button className="btn btn--primary" type="button" onClick={() => setIsOfferOpen(true)}>שליחת הצעה</button>
                             }
                         </div>
                     </div>
@@ -82,6 +87,10 @@ function ApartmentDetailsPage() {
                             <AvailabilityCalendar apartmentId={Number(id)} />
                         </div>
                     </div>
+                    {isOfferOpen &&
+                        <OfferMadal apartmentId={Number(id)} onClose={() => setIsOfferOpen(false)} />
+
+                    }
                 </>
             }
         </>
