@@ -56,7 +56,7 @@ function MyAvailabilityPage() {
             {data &&
                 <div className="two-columns">
                     <div className="two-columns__main card">
-                        {BlockDateForm()}
+                        <BlockDateForm/>
                         <h2 className="card__title">החסימות שלי</h2>
                         {removeError &&
                             <div className="alert alert--error">
