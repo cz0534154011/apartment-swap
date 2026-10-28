@@ -1,5 +1,5 @@
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { swapAction,requestCancel, type Swap, type SwapActionName } from "../api/swaps";
+import { swapAction, requestCancel, type Swap, type SwapActionName } from "../api/swaps";
 import { useState } from "react";
 import FormField from "./FormField";
 
@@ -48,7 +48,7 @@ export type SwapActionsProps = {
 
 function SwapActions({ swap }: SwapActionsProps) {
     const queryClient = useQueryClient()
-    const [reason,setReason]=useState("");
+    const [reason, setReason] = useState("");
     const { mutate: runAction,
         isPending: actionPending,
         error: actionError
@@ -61,11 +61,11 @@ function SwapActions({ swap }: SwapActionsProps) {
         }
     })
 
-     const { mutate: sendCancelRequest,
+    const { mutate: sendCancelRequest,
         isPending: cancelPending,
         error: cancelError
     } = useMutation({
-        mutationFn: ()=>requestCancel(swap.id,reason||undefined),
+        mutationFn: () => requestCancel(swap.id, reason || undefined),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["swap", swap.id] });
             queryClient.invalidateQueries({ queryKey: ["swaps"] });
@@ -75,6 +75,19 @@ function SwapActions({ swap }: SwapActionsProps) {
 
     return (
         <>
+            {swap.cancelRequest?.isOpen &&
+                <div className="alert alert--warning">
+                    <p className="alert__title">
+                        {swap.cancelRequest.requestedByMe ? "ביקשת לבטל את ההחלפה. ממתינים לתשובת הצד השני" : "הצד השני ביקש לבטל את ההחלפה"}
+                    </p>
+                    {swap.cancelRequest.reason &&
+                        <p className="alert__text">
+                            סיבה:
+                            {" "}
+                            {swap.cancelRequest.reason}
+                        </p>}
+                </div>
+            }
             {actionError &&
                 <div className="alert alert--error">
                     <p className="alert__text">{actionError.message}</p>
@@ -90,14 +103,19 @@ function SwapActions({ swap }: SwapActionsProps) {
                 <div className="form">
                     <FormField id="cancelReason" label="סיבת הביטול (לא חובה)">
                         <textarea className="field__input"
-                         id="cancelReason"
-                         rows={3} maxLength={300} value={reason}
-                         onChange={(e)=>setReason(e.target.value)}
-                         ></textarea>
+                            id="cancelReason"
+                            rows={3} maxLength={300} value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                        ></textarea>
                     </FormField>
+                    {cancelError &&
+                        <div className="alert alert--error">
+                            <p className="alert__text">{cancelError.message}</p>
+                        </div>
+                    }
                     <button className="btn btn--danger"
-                    type="button" disabled={cancelPending} 
-                    onClick={()=>sendCancelRequest}
+                        type="button" disabled={cancelPending}
+                        onClick={() => sendCancelRequest()}
                     >בקשת ביטול ההחלפה</button>
                 </div>
             }
