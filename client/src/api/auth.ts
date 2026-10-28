@@ -28,6 +28,10 @@ export type LoginData={
     email:string;
     password:string;
 }
+export type UpdateMeData={
+    fullName?:string;
+    phone?:string|null;
+}
 
 export function register(data:RegisterData):Promise<AuthResponse>{
     return apiRequest("/auth/register",{method:"POST",data:data});
@@ -37,4 +41,7 @@ export function login(data:LoginData):Promise<AuthResponse>{
 }
 export function getMe():Promise<MeResponse>{
     return apiRequest("/auth/me");
+}
+export function updateMe(data:UpdateMeData):Promise<{user:User}>{
+    return apiRequest("/auth/me",{method:"PATCH",data:data});
 }
