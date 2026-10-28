@@ -5,6 +5,7 @@ import AvailabilityCalendar from "../components/AvailabilityCalendar";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getBlockedDates, deleteBlockedDate } from "../api/myApartment";
 import { formatDate } from "../utils/formatDate";
+import BlockDateForm from "../components/BlockDateForm";
 
 function MyAvailabilityPage() {
     const { data, isLoading, error } = useMyApartment();
@@ -55,10 +56,11 @@ function MyAvailabilityPage() {
             {data &&
                 <div className="two-columns">
                     <div className="two-columns__main card">
+                        {BlockDateForm()}
                         <h2 className="card__title">החסימות שלי</h2>
                         {removeError &&
                             <div className="alert alert--error">
-                                <p className="p.alert__text">{removeError.message}</p>
+                                <p className="alert__text">{removeError.message}</p>
                             </div>
                         }
                         {blockedDates?.length === 0 &&
@@ -71,16 +73,20 @@ function MyAvailabilityPage() {
                                         <p className="block-list__dates">
                                             <span className="ltr">
                                                 {formatDate(block.startDate)}
-                                                עד
-                                                {" "}
+                                            </span>
+                                            {" "}
+                                            עד
+                                            {" "}
+                                            <span className="ltr">
                                                 {formatDate(block.endDate)}
                                             </span>
+
                                         </p>
                                         {block.note &&
                                             <p className="block-list__note">{block.note}</p>
                                         }
                                     </div>
-                                    <button className="	btn btn--danger btn--small" type="button" disabled={removePending} onClick={()=>removeBlock(block.id)}>
+                                    <button className="btn btn--danger btn--small" type="button" disabled={removePending} onClick={() => removeBlock(block.id)}>
                                         מחיקה
                                     </button>
                                 </li>)

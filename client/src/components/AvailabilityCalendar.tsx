@@ -4,6 +4,7 @@ import { DayPicker } from "react-day-picker";
 import { he } from "date-fns/locale";
 import { addMonths } from "date-fns";
 
+
 export type AvailabilityCalendarProps = {
     apartmentId: number
 }
