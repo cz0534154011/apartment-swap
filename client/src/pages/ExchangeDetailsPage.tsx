@@ -78,7 +78,36 @@ function ExchangeDetailsPage() {
                             }
                         </div>
                         <div className="two-columns__side">
-
+                            {swap.otherParty &&
+                                <div className="contact-box">
+                                    <h2 className="contact-box__title">פרטי קשר</h2>
+                                    <ul className="contact-box__list">
+                                        <li className="contact-box__item">
+                                            <span className="contact-box__label">
+                                                שם:
+                                            </span>
+                                            {" "}
+                                            {swap.otherParty.fullName}
+                                        </li>
+                                        {swap.otherParty.phone &&
+                                            <li className="contact-box__item">
+                                                <span className="contact-box__label">
+                                                    טלפון:
+                                                </span>
+                                                {" "}
+                                                <span className="ltr">{swap.otherParty.phone}</span>
+                                            </li>
+                                        }
+                                        <li className="contact-box__item">
+                                            <span className="contact-box__label">
+                                                מייל:
+                                            </span>
+                                            {" "}
+                                            <a className="ltr" href={`mailto:${swap.otherParty.email}`}>{swap.otherParty.email}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
                         </div>
                     </div>
                 </>
