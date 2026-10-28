@@ -11,6 +11,7 @@
    8.  לשוניות (tabs)
    9.  מעבר עמודים (pagination)
    10. רשימת הצעות (offer-list)
+   10א. רשימת חסימות (block-list)
    11. טבלה (table)
    12. הודעות (alert)
    13. תיבת פרטי קשר (contact-box)
@@ -1013,6 +1014,45 @@ a.apartment-card:hover {
   .offer-item__actions {
     grid-column: auto;
   }
+}
+
+
+/* =========================================================
+   10א. רשימת חסימות (לוח התפוסה שלי) - שורות בתוך card
+   ========================================================= */
+.block-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.block-list__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.block-list__item:last-child {
+  border-bottom: 0;
+}
+
+.block-list__info {
+  min-width: 0;
+}
+
+.block-list__dates {
+  margin: 0;
+  font-weight: 600;
+}
+
+.block-list__note {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }
 
 

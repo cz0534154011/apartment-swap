@@ -2,11 +2,30 @@ import { Link } from "react-router-dom";
 import { useMyApartment } from "../hooks/useMyApartment"
 import { ApiError } from "../api/client";
 import AvailabilityCalendar from "../components/AvailabilityCalendar";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getBlockedDates, deleteBlockedDate } from "../api/myApartment";
+import { formatDate } from "../utils/formatDate";
 
 function MyAvailabilityPage() {
     const { data, isLoading, error } = useMyApartment();
     const noApartment = error instanceof ApiError
         && error.code === "NO_APARTMENT";
+    const { data: blockedDates } = useQuery({
+        queryKey: ["blockedDates"],
+        queryFn: getBlockedDates,
+        enabled: !!data
+    })
+    const queryClient = useQueryClient()
+    const { mutate: removeBlock,
+        isPending: removePending,
+        error: removeError
+    } = useMutation({
+        mutationFn: deleteBlockedDate,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["blockedDates"] });
+            queryClient.invalidateQueries({ queryKey: ["calendar"] });
+        }
+    })
     return (
         <>
             <div className="page-header">
@@ -36,7 +55,38 @@ function MyAvailabilityPage() {
             {data &&
                 <div className="two-columns">
                     <div className="two-columns__main card">
-                        <p>כאן תהיה רשימת החסימות</p>
+                        <h2 className="card__title">החסימות שלי</h2>
+                        {removeError &&
+                            <div className="alert alert--error">
+                                <p className="p.alert__text">{removeError.message}</p>
+                            </div>
+                        }
+                        {blockedDates?.length === 0 &&
+                            <p className="text-muted">אין חסימות</p>
+                        }
+                        <ul className="block-list">
+                            {blockedDates?.map((block) => (
+                                <li className="block-list__item" key={block.id}>
+                                    <div className="block-list__info">
+                                        <p className="block-list__dates">
+                                            <span className="ltr">
+                                                {formatDate(block.startDate)}
+                                                עד
+                                                {" "}
+                                                {formatDate(block.endDate)}
+                                            </span>
+                                        </p>
+                                        {block.note &&
+                                            <p className="block-list__note">{block.note}</p>
+                                        }
+                                    </div>
+                                    <button className="	btn btn--danger btn--small" type="button" disabled={removePending} onClick={()=>removeBlock(block.id)}>
+                                        מחיקה
+                                    </button>
+                                </li>)
+                            )
+                            }
+                        </ul>
                     </div>
                     <div className="two-columns__side">
                         <AvailabilityCalendar apartmentId={data.apartment.id} />

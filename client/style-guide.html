@@ -139,6 +139,7 @@
             <li><a href="#tabs">לשוניות</a></li>
             <li><a href="#pagination">מעבר עמודים</a></li>
             <li><a href="#offers">רשימת הצעות</a></li>
+            <li><a href="#blocks">רשימת חסימות</a></li>
             <li><a href="#table">טבלה</a></li>
             <li><a href="#alerts">הודעות</a></li>
             <li><a href="#contact">פרטי קשר</a></li>
@@ -580,6 +581,30 @@ details.terms-box > summary.terms-box__summary + p.terms-box__text
           <code class="sg-classes">ul.offer-list > li.offer-item (+ .offer-item--highlight)
 .offer-item > .offer-item__main > .offer-item__title + .offer-item__meta
             + .offer-item__status + .offer-item__actions</code>
+        </section>
+
+        <!-- ========== רשימת חסימות ========== -->
+        <section class="sg-section" id="blocks">
+          <h2>רשימת חסימות</h2>
+          <div class="sg-demo card">
+            <ul class="block-list">
+              <li class="block-list__item">
+                <div class="block-list__info">
+                  <p class="block-list__dates"><span class="ltr">13/11/2026</span> עד <span class="ltr">15/11/2026</span></p>
+                  <p class="block-list__note">אורחים מהמשפחה</p>
+                </div>
+                <button class="btn btn--danger btn--small" type="button">מחיקה</button>
+              </li>
+              <li class="block-list__item">
+                <div class="block-list__info">
+                  <p class="block-list__dates"><span class="ltr">24/12/2026</span> עד <span class="ltr">25/12/2026</span></p>
+                </div>
+                <button class="btn btn--danger btn--small" type="button">מחיקה</button>
+              </li>
+            </ul>
+          </div>
+          <code class="sg-classes">ul.block-list > li.block-list__item
+.block-list__item > .block-list__info (.block-list__dates + .block-list__note) + button</code>
         </section>
 
         <!-- ========== טבלה ========== -->
