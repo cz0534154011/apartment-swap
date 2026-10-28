@@ -56,7 +56,7 @@ function MyAvailabilityPage() {
             {data &&
                 <div className="two-columns">
                     <div className="two-columns__main card">
-                        <BlockDateForm/>
+                        <BlockDateForm />
                         <h2 className="card__title">החסימות שלי</h2>
                         {removeError &&
                             <div className="alert alert--error">
@@ -71,6 +71,8 @@ function MyAvailabilityPage() {
                                 <li className="block-list__item" key={block.id}>
                                     <div className="block-list__info">
                                         <p className="block-list__dates">
+                                            מ:
+                                            {" "}
                                             <span className="ltr">
                                                 {formatDate(block.startDate)}
                                             </span>
