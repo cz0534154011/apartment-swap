@@ -19,6 +19,7 @@ import MyExchangesPage from './pages/MyExchangesPage'
 import MyProfilePage from './pages/MyProfilePage'
 import RegisterPage from './pages/RegisterPage'
 import NotFoundPage from './pages/NotFoundPage'
+import ProtectedRoute from "./components/ProtectedRoute";
 
 
 function App() {
@@ -29,20 +30,30 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path='/' element={<HomePage />}></Route>
-          <Route path='/admin/apartments' element={<AdminApartmentsPage />}></Route>
-          <Route path='/admin/cities' element={<AdminCitiesPage />}></Route>
-          <Route path='/admin/exchanges' element={<AdminExchangesPage />}></Route>
-          <Route path='/admin/users' element={<AdminUsersPage />}></Route>
           <Route path='/apartments/:id' element={<ApartmentDetailsPage />}></Route>
           <Route path='/terms' element={<TermsPage />}></Route>
-          <Route path='/exchanges/:id' element={<ExchangeDetailsPage />}></Route>
           <Route path='/login' element={<LoginPage />}></Route>
-          <Route path='/my-apartment' element={<MyApartmentPage />}></Route>
-          <Route path='/my-availability' element={<MyAvailabilityPage />}></Route>
-          <Route path='/my-exchanges' element={<MyExchangesPage />}></Route>
-          <Route path='/my-profile' element={<MyProfilePage />}></Route>
           <Route path='/register' element={<RegisterPage />}></Route>
           <Route path='*' element={<NotFoundPage />}></Route>
+
+          <Route element={<ProtectedRoute role="USER" />}>
+            <Route path='/my-apartment' element={<MyApartmentPage />}></Route>
+            <Route path='/my-availability' element={<MyAvailabilityPage />}></Route>
+            <Route path='/my-exchanges' element={<MyExchangesPage />}></Route>
+            <Route path='/exchanges/:id' element={<ExchangeDetailsPage />}></Route>
+          </Route>
+
+          <Route element={<ProtectedRoute role="ADMIN" />}>
+            <Route path='/admin/apartments' element={<AdminApartmentsPage />}></Route>
+            <Route path='/admin/cities' element={<AdminCitiesPage />}></Route>
+            <Route path='/admin/exchanges' element={<AdminExchangesPage />}></Route>
+            <Route path='/admin/users' element={<AdminUsersPage />}></Route>
+          </Route>
+
+          <Route element={<ProtectedRoute />}>
+            <Route path='/my-profile' element={<MyProfilePage />}></Route>
+          </Route>
+
         </Route>
       </Routes>
     </>

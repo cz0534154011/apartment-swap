@@ -54,6 +54,9 @@ function Layout() {
                                     <li>
                                         <NavLink className="site-nav__link" to={'/admin/exchanges'}>כל ההחלפות</NavLink>
                                     </li>
+                                     <li>
+                                        <NavLink className="site-nav__link" to={'/my-profile'}>פרופיל</NavLink>
+                                    </li>
                                 </>
                             }
                             {!isLoading && !user &&
