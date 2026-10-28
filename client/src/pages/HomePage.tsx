@@ -3,6 +3,7 @@ import ApartmentCard from "../components/ApartmentCard";
 import { searchApartments, type SearchFilters } from "../api/apartments";
 import { useState } from "react";
 import FilterForm from "../components/FilterForm";
+import Pagination from "../components/Pagination";
 
 function HomePage() {
    const [filters, setFilters] = useState<SearchFilters>({});
@@ -44,12 +45,9 @@ function HomePage() {
                </li>
             ))}</ul>
          }
-         {data && data.totalPages > 1 &&
-            <nav className="pagination">
-               <button className="pagination__btn" type="button" disabled={data.page === 1} onClick={() => setFilters({ ...filters, page: data.page - 1 })} >הקודם</button>
-               <span className="pagination__info">עמוד {data.page} מתוך {data.totalPages}</span>
-               <button className="pagination__btn" type="button" disabled={data.page === data.totalPages} onClick={() => setFilters({ ...filters, page: data.page + 1 })} >הבא</button>
-            </nav>
+         {data && 
+            <Pagination page={data.page} totalPages={data.totalPages}
+            onPageChange={(newPage) => setFilters({ ...filters, page: newPage })}/>
          }
       </>
    )
