@@ -7,14 +7,18 @@ import { addMonths } from "date-fns";
 export type AvailabilityCalendarProps = {
     apartmentId: number
 }
+function toDateRange(range: { startDate: string, endDate: string }) {
+    return { from: new Date(range.startDate), to: new Date(range.endDate) }
+}
 function AvailabilityCalendar({ apartmentId }: AvailabilityCalendarProps) {
     const { data: calendar } = useQuery({
         queryKey: ["calendar", apartmentId],
         queryFn: () => getCalendar(apartmentId)
     })
-    const swapDays = calendar?.busyRanges?.filter((range) => range.reason === "SWAP").map((range) => ({ from: new Date(range.startDate), to: new Date(range.endDate) }))
-    const blockedDays = calendar?.busyRanges?.filter((range) => range.reason === "BLOCKED").map((range) => ({ from: new Date(range.startDate), to: new Date(range.endDate) }))
-    const maxDate = addMonths(new Date(), 6)
+    const swapDays = calendar?.busyRanges?.filter((range) => range.reason === "SWAP").map(toDateRange);
+    const blockedDays = calendar?.busyRanges?.filter((range) => range.reason === "BLOCKED").map(toDateRange);
+    const pendingDays = calendar?.pendingRanges?.map(toDateRange)
+    const maxDate = addMonths(new Date(), 6);
     return (
         <>
             <div className="calendar">
@@ -22,8 +26,8 @@ function AvailabilityCalendar({ apartmentId }: AvailabilityCalendarProps) {
                     dir="rtl" locale={he}
                     startMonth={new Date()}
                     disabled={[{ before: new Date() }, { after: maxDate }]}
-                    modifiers={{ swap: swapDays, blocked: blockedDays }}
-                    modifiersClassNames={{ swap: "day--swap", blocked: "day--blocked" }}
+                    modifiers={{ swap: swapDays, blocked: blockedDays, pending: pendingDays }}
+                    modifiersClassNames={{ swap: "day--swap", blocked: "day--blocked", pending : "day--pending" }}
                     endMonth={maxDate}
                 />
             </div>
@@ -40,6 +44,12 @@ function AvailabilityCalendar({ apartmentId }: AvailabilityCalendarProps) {
                     <span className="calendar-legend__swatch calendar-legend__swatch--blocked"></span>
                     חסום
                 </li>
+                {calendar?.pendingRanges && 
+                    <li className="calendar-legend__item">
+                    <span className="calendar-legend__swatch calendar-legend__swatch--pending"></span>
+                    הצעה ממתינה
+                </li>
+                }
             </ul>
         </>
     )
