@@ -1,15 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getMyApartment, setMyApartmentStatus } from "../api/myApartment"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { setMyApartmentStatus } from "../api/myApartment"
 import { ApiError } from "../api/client";
 import ApartmentForm from "../components/ApartmentForm";
 import { useSiteInfo } from "../hooks/useSiteInfo";
+import { useMyApartment } from "../hooks/useMyApartment";
 
 function MyApartmentPage() {
-    const { data, error, isLoading } = useQuery({
-        queryKey: ["myApartment"],
-        queryFn: getMyApartment,
-        retry: false
-    })
+    const { data, error, isLoading } = useMyApartment()
     const noApartment = error instanceof ApiError
         && error.code === "NO_APARTMENT";
     const queryClient = useQueryClient()
