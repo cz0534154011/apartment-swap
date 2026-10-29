@@ -13,7 +13,7 @@ export type UpdateCityData={
 export function getCities():Promise<City[]>{
     return apiRequest("/cities");
 }
-export function getAllCities(includeInactive?:boolean):Promise<City[]>{
+export function getAllCities():Promise<City[]>{
     return apiRequest("/cities",{params:{includeInactive:true}});
 }
 export function createCity(name :string):Promise<{city:City}>{
