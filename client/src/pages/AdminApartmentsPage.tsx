@@ -11,19 +11,6 @@ function AdminApartmentsPage() {
     })
     const queryClient = useQueryClient();
 
-    // const { mutate: addCity,
-    //     isPending: addPending,
-    //     error: addError
-    // } = useMutation({
-    //     mutationFn: createCity,
-    //     onSuccess: () => {
-    //         setNewName("");
-    //         queryClient.invalidateQueries({
-    //             queryKey: ["cities"]
-    //         })
-    //     }
-    // })
-
     const { mutate: blockApt,
         error: blockError
     } = useMutation({
